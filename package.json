@@ -10,14 +10,15 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:commit-test.helloWorld"
+		"onCommand:commit-test.verifyEnvironment"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "commit-test.helloWorld",
-				"title": "Hello World"
+				"command": "commit-test.verifyEnvironment",
+                "title": "Verify Environment",
+                "category": "Commit-Test"
 			}
 		]
 	},
