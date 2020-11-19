@@ -17,8 +17,8 @@
 		"commands": [
 			{
 				"command": "commit-test.verifyEnvironment",
-                "title": "Verify Environment",
-                "category": "Commit-Test"
+				"title": "Verify Environment",
+				"category": "Commit-Test"
 			}
 		]
 	},
