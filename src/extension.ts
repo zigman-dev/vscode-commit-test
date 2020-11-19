@@ -4,6 +4,8 @@ import verifyEnvironment from "./verify";
 
 export function activate(context: vscode.ExtensionContext) {
 
+    console.log("activate()")
+
     let disposable = vscode.commands.registerCommand(
         'commit-test.verifyEnvironment', verifyEnvironment);
 

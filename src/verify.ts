@@ -40,6 +40,28 @@ jenkins.job.build(
 )
 */
 
-export default function verifyEnvironment() {
+import * as vscode from 'vscode';
+
+let jenkins = require('jenkins')
+
+//------------------------------------------------------------------------------
+export default async function verifyEnvironment() {
     console.log("verifyEnvironment()")
+
+    try {
+        let jenkinsInstance = jenkins({
+            baseUrl: "http://jy.hsu:xxxxx@172.26.6.130:8080",
+            crumbIssuer: true,
+            formData: require('form-data'),
+            promisify: true
+        })
+        let response = await jenkinsInstance.job.get('mainline/commit_test')
+        console.log(response)
+        vscode.window.showInformationMessage('OK, we are good to go');
+    } catch (error) {
+        console.error(error)
+        vscode.window.showWarningMessage('Oops, the required job is not found');
+    }
+
+    console.log("OK")
 }
