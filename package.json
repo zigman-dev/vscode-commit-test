@@ -14,13 +14,38 @@
 	],
 	"main": "./out/extension.js",
 	"contributes": {
+		"_FIXME": "Add descriptions",
 		"commands": [
 			{
 				"command": "commit-test.verifyEnvironment",
 				"title": "Verify Environment",
 				"category": "Commit-Test"
 			}
-		]
+		],
+		"configuration": {
+			"title": "Commit-Test",
+			"properties": {
+				"commit-test.jenkins.account.user": {
+					"type": "string"
+				},
+				"commit-test.jenkins.account.password": {
+					"type": "string"
+				},
+				"commit-test.jenkins.hostAddress": {
+					"type": "string",
+					"format": "uri",
+					"default": "http://172.26.6.130:8080"
+				},
+				"commit-test.jenkins.jobName": {
+					"type": "string",
+					"default": "mainline/commit_test"
+				}
+			},
+			"default": {
+				"commit-test.jenkins.hostAddress": "http://172.26.6.130:8080",
+				"commit-test.jenkins.jobName": "mainline/commit_test"
+			}
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
