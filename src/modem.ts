@@ -1,14 +1,19 @@
+let callback = (err: Error, data: string) => {
+    if (err) console.error(err);
+    console.log(data)
+}
+
 import { URL } from 'url';
 import * as vscode from 'vscode';
 
 let jenkins = require('jenkins')
+let fs = require('fs')
 
 //------------------------------------------------------------------------------
-export async function verifyEnvironment() {
-    console.log("verifyEnvironment()")
+export async function commitTest() {
+    console.log("commitTest()")
 
     // Get user acount if supplied
-    // FIXME: Handle multi-folder workspace
     let config = vscode.workspace.getConfiguration("commit-test.jenkins")
     let user = config.get<string>("account.user")
     let password = config.get<string>("account.password")
@@ -21,9 +26,9 @@ export async function verifyEnvironment() {
     }
 
     let url = new URL(host)
-    if(user)
+    if (user)
         url.username = user
-    if(password)
+    if (password)
         url.password = password
 
     try {
@@ -33,7 +38,13 @@ export async function verifyEnvironment() {
             formData: require('form-data'),
             promisify: true
         })
-        let response = await jenkinsInstance.job.get('mainline/commit_test')
+        let response = await jenkinsInstance.job.build(
+            {
+                name: 'mainline/commit_test',
+                parameters: { patch: fs.createReadStream('/home/zigman/Downloads/disable-cg.1.patch'), mail: 'jy.hsu@realtek.com' }
+            },
+            callback
+        )
         console.log(response)
         vscode.window.showInformationMessage('OK, we are good to go');
     } catch (error) {
