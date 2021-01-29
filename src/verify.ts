@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 let jenkins = require('jenkins')
 
 //------------------------------------------------------------------------------
-export async function verifyEnvironment() {
+export default async function verifyEnvironment() {
     console.log("verifyEnvironment()")
 
     // Get user acount if supplied

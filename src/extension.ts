@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
-import { verifyEnvironment } from "./verify";
-import { commitTest } from "./modem";
+import verifyEnvironment from "./verify";
+import commitTest from "./modem";
 
 export function activate(context: vscode.ExtensionContext) {
 

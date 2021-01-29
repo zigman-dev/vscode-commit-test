@@ -20,6 +20,11 @@
 				"command": "commit-test.verifyEnvironment",
 				"title": "Verify Environment",
 				"category": "Commit-Test"
+			},
+			{
+				"command": "commit-test.commitTest",
+				"title": "Submit commit test",
+				"category": "Commit-Test"
 			}
 		],
 		"configuration": {

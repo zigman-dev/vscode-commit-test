@@ -10,7 +10,7 @@ let jenkins = require('jenkins')
 let fs = require('fs')
 
 //------------------------------------------------------------------------------
-export async function commitTest() {
+export default async function commitTest() {
     console.log("commitTest()")
 
     // Get user acount if supplied
