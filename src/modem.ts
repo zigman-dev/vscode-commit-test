@@ -17,20 +17,35 @@ let callback = (err: Error, data: string) => {
 }
 
 //------------------------------------------------------------------------------
-async function is_svn_workspace(wc: string): Promise<boolean> {
+// FIXME: Create a class for svn operations
+async function svn_is_workspace(wc: string): Promise<boolean> {
     let result = await new Promise<boolean>((resolve, reject) => {
         svn.info(
             wc,
             {},
             (error: Error, result: any) => {
-                console.log("--", error, result)
-                resolve(error == null)
+                resolve(error == null);
             }
         )
     })
-    console.log("wc:", wc, result);
     return result;
 }
+
+//------------------------------------------------------------------------------
+async function svn_get_patch(wc: string): Promise<string> {
+    let diff = await new Promise<string>((resolve, reject) => {
+        svn._execSVN(
+            "diff",
+            wc,
+            {"patch-compatible": true},
+            (error: Error, result: any) => {
+                resolve(result);
+            }
+        )
+    })
+    return diff;
+}
+
 
 //------------------------------------------------------------------------------
 //  interface
@@ -39,12 +54,12 @@ export default async function commitTest() {
     console.log("commitTest()")
 
     // FIXME: Rewrite with filter/map
-    let folders: string[] = [];
+    let folders: vscode.WorkspaceFolder[] = [];
     for (let folder of vscode.workspace.workspaceFolders || []) {
-        let result = await is_svn_workspace(folder.uri.fsPath);
+        let result = await svn_is_workspace(folder.uri.fsPath);
         console.log(folder.name, ":", result);
         if (result)
-            folders.push(folder.name);
+            folders.push(folder);
     }
 
     if (folders.length == 0) {
@@ -54,15 +69,23 @@ export default async function commitTest() {
     let folder = folders[0];
     if (folders.length > 1) {
         let pick = await vscode.window.showQuickPick(
-            folders,
+            folders.map(folder => {
+                return {
+                    label: folder.name,
+                    folder: folder
+                }
+            }),
             { placeHolder: "Pick a folder" }
         );
         if (!pick)
             return
-        folder = pick
+        folder = pick.folder
     }
 
-    console.log("Go for ${folder}!", folder);
+    console.log(`Go for ${folder.name}`);
+
+    let diff = await svn_get_patch(folder.uri.fsPath);
+    console.log(diff);
 
     /*
         // Get user acount if supplied
