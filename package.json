@@ -10,7 +10,8 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:commit-test.verifyEnvironment"
+		"onCommand:commit-test.verifyEnvironment",
+		"onCommand:commit-test.commitTest"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
