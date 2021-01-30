@@ -53,6 +53,9 @@ async function svn_get_patch(wc: string): Promise<string> {
 export default async function commitTest() {
     console.log("commitTest()")
 
+    //------------------------
+    //  select svn workspace
+    //------------------------
     // FIXME: Rewrite with filter/map
     let folders: vscode.WorkspaceFolder[] = [];
     for (let folder of vscode.workspace.workspaceFolders || []) {
@@ -84,49 +87,57 @@ export default async function commitTest() {
 
     console.log(`Go for ${folder.name}`);
 
-    let diff = await svn_get_patch(folder.uri.fsPath);
+    //---------------------
+    //   generate patch
+    //---------------------
+    let cwd = process.cwd()
+    process.chdir(folder.uri.fsPath);
+    let diff = await svn_get_patch(".");
+    process.chdir(cwd);
     console.log(diff);
 
-    /*
-        // Get user acount if supplied
-        let config = vscode.workspace.getConfiguration("commit-test.jenkins")
-        let user = config.get<string>("account.user")
-        let password = config.get<string>("account.password")
-        let host = config.get<string>("hostAddress")
-        let job = config.get<string>("jobName")
+    //---------------------
+    //  submit to Jenkins
+    //---------------------
+    // Get user acount if supplied
+    let config = vscode.workspace.getConfiguration("commit-test.jenkins")
+    let user = config.get<string>("account.user")
+    let password = config.get<string>("account.password")
+    let host = config.get<string>("hostAddress")
+    let job = config.get<string>("jobName")
     
-        if (!host) {
-            vscode.window.showErrorMessage('Host name is undefined');
-            return
-        }
+    if (!host) {
+        vscode.window.showErrorMessage('Host name is undefined');
+        return
+    }
     
-        let url = new URL(host)
-        if (user)
-            url.username = user
-        if (password)
-            url.password = password
+    let url = new URL(host)
+    if (user)
+        url.username = user
+    if (password)
+        url.password = password
     
-        try {
-            let jenkinsInstance = jenkins({
-                baseUrl: url.href,
-                crumbIssuer: true,
-                formData: require('form-data'),
-                promisify: true
-            })
-            let response = await jenkinsInstance.job.build(
-                {
-                    name: 'mainline/commit_test',
-                    parameters: { patch: fs.createReadStream('/home/zigman/Downloads/disable-cg.1.patch'), mail: 'jy.hsu@realtek.com' }
-                },
-                callback
-            )
-            console.log(response)
-            vscode.window.showInformationMessage('OK, we are good to go');
-        } catch (error) {
-            console.error(error)
-            vscode.window.showWarningMessage('Oops, the required job is not found');
-        }
-    
-        console.log("OK")
-    */
+    try {
+        let jenkinsInstance = jenkins({
+            baseUrl: url.href,
+            crumbIssuer: true,
+            formData: require('form-data'),
+            promisify: true
+        })
+        let response = await jenkinsInstance.job.build(
+            {
+                name: job,
+                parameters: { 
+                    patch: Buffer.from(diff),
+                    mail: 'jy.hsu@realtek.com'
+                }
+            },
+            callback
+        )
+        console.log(response)
+        vscode.window.showInformationMessage('Submitted');
+    } catch (error) {
+        console.error(error)
+        vscode.window.showWarningMessage('Oops, the required job is not found');
+    }
 }
