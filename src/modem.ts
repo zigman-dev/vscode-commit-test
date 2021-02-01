@@ -32,12 +32,33 @@ async function svn_is_workspace(wc: string): Promise<boolean> {
 }
 
 //------------------------------------------------------------------------------
-async function svn_get_patch(wc: string): Promise<string> {
+async function svn_get_changelists(wc: string): Promise<string[]> {
+    let diff = await new Promise<string[]>((resolve, reject) => {
+        svn.status(
+            wc,
+            {},
+            (error: Error, result: any) => {
+                resolve(result.status.changelist.map(
+                    (changelist: any) => changelist._attribute.name
+                ))
+            }
+        )
+    })
+    return diff;
+}
+
+//------------------------------------------------------------------------------
+async function svn_get_patch(wc: string, changelist: string | null): Promise<string> {
+    let options: Record<string, string | true> = {
+        "patch-compatible": true
+    };
+    if (changelist != null)
+        options["changelist"] = changelist;
     let diff = await new Promise<string>((resolve, reject) => {
         svn._execSVN(
             "diff",
             wc,
-            {"patch-compatible": true},
+            options,
             (error: Error, result: any) => {
                 resolve(result);
             }
@@ -45,7 +66,6 @@ async function svn_get_patch(wc: string): Promise<string> {
     })
     return diff;
 }
-
 
 //------------------------------------------------------------------------------
 //  interface
@@ -85,14 +105,31 @@ export default async function commitTest() {
         folder = pick.folder
     }
 
-    console.log(`Go for ${folder.name}`);
+    console.log(`folder: ${folder.name}`);
+
+    //---------------------
+    //  select changelist
+    //---------------------
+    let changelists = await svn_get_changelists(folder.uri.fsPath);
+    let changelist: string | null = null;
+    if (changelists.length > 1) {
+        let pick = await vscode.window.showQuickPick(
+            changelists,
+            { placeHolder: "Pick a changelist" }
+        );
+        if (!pick)
+            return
+        changelist = pick
+    }
+
+    console.log(`changelist: ${changelist}`);
 
     //---------------------
     //   generate patch
     //---------------------
     let cwd = process.cwd()
     process.chdir(folder.uri.fsPath);
-    let diff = await svn_get_patch(".");
+    let diff = await svn_get_patch(".", changelist);
     process.chdir(cwd);
     console.log(diff);
 
@@ -129,6 +166,7 @@ export default async function commitTest() {
                 name: job,
                 parameters: { 
                     patch: Buffer.from(diff),
+                    // FIXME: Read from user configurations
                     mail: 'jy.hsu@realtek.com'
                 }
             },
