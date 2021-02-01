@@ -11,13 +11,6 @@ let fs = require('fs')
 //------------------------------------------------------------------------------
 //  functions
 //------------------------------------------------------------------------------
-// FIXME: Convert to async/await
-let callback = (err: Error, data: string) => {
-    if (err) console.error(err);
-    console.log(data)
-}
-
-//------------------------------------------------------------------------------
 // FIXME: Create a class for svn operations
 async function svn_is_workspace(wc: string): Promise<boolean> {
     let result = await new Promise<boolean>((resolve, reject) => {
