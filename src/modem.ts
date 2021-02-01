@@ -11,6 +11,7 @@ let fs = require('fs')
 //------------------------------------------------------------------------------
 //  functions
 //------------------------------------------------------------------------------
+// FIXME: Convert to async/await
 let callback = (err: Error, data: string) => {
     if (err) console.error(err);
     console.log(data)
@@ -161,19 +162,37 @@ export default async function commitTest() {
             formData: require('form-data'),
             promisify: true
         })
-        let response = await jenkinsInstance.job.build(
-            {
-                name: job,
-                parameters: { 
-                    patch: Buffer.from(diff),
-                    // FIXME: Read from user configurations
-                    mail: 'jy.hsu@realtek.com'
-                }
-            },
-            callback
-        )
-        console.log(response)
-        vscode.window.showInformationMessage('Submitted');
+        let queueItem = await new Promise<number>(
+            (resolve, reject) => {
+                jenkinsInstance.job.build(
+                    {
+                        name: job,
+                        parameters: { 
+                            patch: Buffer.from(diff),
+                            // FIXME: Read from user configurations
+                            mail: 'jy.hsu@realtek.com'
+                        }
+                    },
+                    (error: Error, result: any) => {
+                        resolve(Number(result));
+                    }
+                )
+            }
+        );
+        console.log(`queue item: ${queueItem}`);
+        let jobUrl: string = await new Promise(
+            (resolve, reject) => {
+                jenkinsInstance.queue.item(
+                    Number(queueItem),
+                    (error: Error, result: any) => {
+                        resolve(result.executable.url);
+                    }
+                )
+            }
+        );
+        console.log(jobUrl);
+
+        vscode.window.showInformationMessage(`Submitted: ${jobUrl}`);
     } catch (error) {
         console.error(error)
         vscode.window.showWarningMessage('Oops, the required job is not found');
