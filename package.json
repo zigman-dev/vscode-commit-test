@@ -40,6 +40,10 @@
 					"type": "string",
 					"scope": "resource"
 				},
+				"commit-test.jenkins.account.mail": {
+					"type": "string",
+					"scope": "resource"
+				},
 				"commit-test.jenkins.hostAddress": {
 					"type": "string",
 					"format": "uri",

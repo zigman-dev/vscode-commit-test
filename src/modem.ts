@@ -68,6 +68,7 @@ export default async function commitTest() {
     );
     let user = config.get<string>("account.user");
     let password = config.get<string>("account.password");
+    let mail = config.get<string>("account.mail");
     let host = config.get<string>("hostAddress");
     let job = config.get<string>("jobName");
 
@@ -92,16 +93,17 @@ export default async function commitTest() {
             formData: require('form-data'),
             promisify: true
         })
+        let parameters: any = {
+            patch: Buffer.from(diff)
+        }
+        if (mail)
+            parameters.mail = mail;
         let queueItem = await new Promise<number>(
             (resolve, reject) => {
                 jenkinsInstance.job.build(
                     {
                         name: job,
-                        parameters: {
-                            patch: Buffer.from(diff),
-                            // FIXME: Read from user configurations
-                            mail: 'jy.hsu@realtek.com'
-                        }
+                        parameters
                     },
                     (error: Error, result: any) => {
                         resolve(Number(result));
