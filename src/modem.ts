@@ -7,6 +7,8 @@ import * as vscode from 'vscode';
 let jenkins = require('jenkins')
 let fs = require('fs')
 
+let util = require('util');
+
 // project
 import svn from "./svn"
 import workspace from "./workspace"
@@ -112,19 +114,27 @@ export default async function commitTest() {
             }
         );
         console.log(`queue item: ${queueItem}`);
-        let jobUrl: string = await new Promise(
+        let buildUrl: string | null = null;
+        let retry = 30;
+        do {
+            await setTimeout(function(){}, 1000);
+            let build: any = await new Promise(
             (resolve, reject) => {
                 jenkinsInstance.queue.item(
                     Number(queueItem),
                     (error: Error, result: any) => {
-                        resolve(result.executable.url);
+                        resolve(result);
                     }
                 )
-            }
-        );
-        console.log(jobUrl);
+            });
+            console.log(util.inspect(build, { depth: null }));
+            if (build.executable)
+                buildUrl = build.executable.url;
+            retry--;
+        } while(buildUrl == null || retry == 0);
+        console.log(retry, buildUrl);
 
-        vscode.window.showInformationMessage(`Submitted: ${jobUrl}`);
+        vscode.window.showInformationMessage(`Submitted: ${buildUrl}`);
     } catch (error) {
         console.error(error)
         vscode.window.showWarningMessage('Failed submitting job');
