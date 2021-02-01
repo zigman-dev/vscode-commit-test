@@ -4,62 +4,16 @@
 import { URL } from 'url';
 import * as vscode from 'vscode';
 
-let svn = require('svn-interface')
 let jenkins = require('jenkins')
 let fs = require('fs')
+
+// project
+import svn from "./svn"
+import workspace from "./workspace"
 
 //------------------------------------------------------------------------------
 //  functions
 //------------------------------------------------------------------------------
-// FIXME: Create a class for svn operations
-async function svn_is_workspace(wc: string): Promise<boolean> {
-    let result = await new Promise<boolean>((resolve, reject) => {
-        svn.info(
-            wc,
-            {},
-            (error: Error, result: any) => {
-                resolve(error == null);
-            }
-        )
-    })
-    return result;
-}
-
-//------------------------------------------------------------------------------
-async function svn_get_changelists(wc: string): Promise<string[]> {
-    let diff = await new Promise<string[]>((resolve, reject) => {
-        svn.status(
-            wc,
-            {},
-            (error: Error, result: any) => {
-                resolve(result.status.changelist.map(
-                    (changelist: any) => changelist._attribute.name
-                ))
-            }
-        )
-    })
-    return diff;
-}
-
-//------------------------------------------------------------------------------
-async function svn_get_patch(wc: string, changelist: string | null): Promise<string> {
-    let options: Record<string, string | true> = {
-        "patch-compatible": true
-    };
-    if (changelist != null)
-        options["changelist"] = changelist;
-    let diff = await new Promise<string>((resolve, reject) => {
-        svn._execSVN(
-            "diff",
-            wc,
-            options,
-            (error: Error, result: any) => {
-                resolve(result);
-            }
-        )
-    })
-    return diff;
-}
 
 //------------------------------------------------------------------------------
 //  interface
@@ -70,41 +24,18 @@ export default async function commitTest() {
     //------------------------
     //  select svn workspace
     //------------------------
-    // FIXME: Rewrite with filter/map
-    let folders: vscode.WorkspaceFolder[] = [];
-    for (let folder of vscode.workspace.workspaceFolders || []) {
-        let result = await svn_is_workspace(folder.uri.fsPath);
-        console.log(folder.name, ":", result);
-        if (result)
-            folders.push(folder);
-    }
+    let folder = await workspace.selectFolder(true);
 
-    if (folders.length == 0) {
-        vscode.window.showWarningMessage('No svn folder exists');
+    if (folder == null) {
+        vscode.window.showWarningMessage("No svn workspace folder selected");
         return;
     }
-    let folder = folders[0];
-    if (folders.length > 1) {
-        let pick = await vscode.window.showQuickPick(
-            folders.map(folder => {
-                return {
-                    label: folder.name,
-                    folder: folder
-                }
-            }),
-            { placeHolder: "Pick a folder" }
-        );
-        if (!pick)
-            return
-        folder = pick.folder
-    }
-
     console.log(`folder: ${folder.name}`);
 
     //---------------------
     //  select changelist
     //---------------------
-    let changelists = await svn_get_changelists(folder.uri.fsPath);
+    let changelists = await svn.get_changelists(folder.uri.fsPath);
     let changelist: string | null = null;
     if (changelists.length > 1) {
         let pick = await vscode.window.showQuickPick(
@@ -123,31 +54,37 @@ export default async function commitTest() {
     //---------------------
     let cwd = process.cwd()
     process.chdir(folder.uri.fsPath);
-    let diff = await svn_get_patch(".", changelist);
+    let diff = await svn.get_patch(".", changelist);
     process.chdir(cwd);
     console.log(diff);
 
     //---------------------
     //  submit to Jenkins
     //---------------------
-    // Get user acount if supplied
-    let config = vscode.workspace.getConfiguration("commit-test.jenkins")
-    let user = config.get<string>("account.user")
-    let password = config.get<string>("account.password")
-    let host = config.get<string>("hostAddress")
-    let job = config.get<string>("jobName")
-    
+    // FIXME: DRY these jenkins configuration reading
+    let config = vscode.workspace.getConfiguration(
+        "commit-test.jenkins",
+        folder
+    );
+    let user = config.get<string>("account.user");
+    let password = config.get<string>("account.password");
+    let host = config.get<string>("hostAddress");
+    let job = config.get<string>("jobName");
+
     if (!host) {
-        vscode.window.showErrorMessage('Host name is undefined');
+        vscode.window.showErrorMessage('Missing host URL');
         return
     }
-    
-    let url = new URL(host)
-    if (user)
-        url.username = user
-    if (password)
-        url.password = password
-    
+
+    if (!user || !password) {
+        vscode.window.showErrorMessage('Missing username/password');
+        return
+    }
+
+    let url = new URL(host);
+    url.username = user;
+    url.password = password;
+
     try {
         let jenkinsInstance = jenkins({
             baseUrl: url.href,
@@ -160,7 +97,7 @@ export default async function commitTest() {
                 jenkinsInstance.job.build(
                     {
                         name: job,
-                        parameters: { 
+                        parameters: {
                             patch: Buffer.from(diff),
                             // FIXME: Read from user configurations
                             mail: 'jy.hsu@realtek.com'
@@ -188,6 +125,6 @@ export default async function commitTest() {
         vscode.window.showInformationMessage(`Submitted: ${jobUrl}`);
     } catch (error) {
         console.error(error)
-        vscode.window.showWarningMessage('Oops, the required job is not found');
+        vscode.window.showWarningMessage('Failed submitting job');
     }
 }

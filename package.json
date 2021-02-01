@@ -33,18 +33,22 @@
 			"title": "Commit-Test",
 			"properties": {
 				"commit-test.jenkins.account.user": {
-					"type": "string"
+					"type": "string",
+					"scope": "resource"
 				},
 				"commit-test.jenkins.account.password": {
-					"type": "string"
+					"type": "string",
+					"scope": "resource"
 				},
 				"commit-test.jenkins.hostAddress": {
 					"type": "string",
 					"format": "uri",
+					"scope": "resource",
 					"default": "http://172.26.6.130:8080"
 				},
 				"commit-test.jenkins.jobName": {
 					"type": "string",
+					"scope": "resource",
 					"default": "mainline/commit_test"
 				}
 			},
