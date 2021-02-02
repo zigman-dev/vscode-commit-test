@@ -17,7 +17,10 @@ import workspace from "./workspace"
 //  variables
 //------------------------------------------------------------------------------
 let loggingChannel: vscode.OutputChannel | null = null;
-let running = false;
+let executable: {
+    number: number | null,
+    url: string
+} | null = null;
 
 //------------------------------------------------------------------------------
 //  functions
@@ -28,6 +31,13 @@ let running = false;
 //------------------------------------------------------------------------------
 export default async function commitTest() {
     console.log("commitTest()")
+
+    if (executable != null) {
+        console.error(`${executable.url} is still active`);
+        vscode.window.showWarningMessage(
+            `A build is already submitted and not finished yet (${executable.url})`);
+        return;
+    }
 
     //------------------------
     //  select svn workspace
@@ -119,12 +129,10 @@ export default async function commitTest() {
                 )
             }
         );
-        running = true;
         console.log(`queue item: ${queueItem}`);
-        let executable: any = null;
         let retry = 30;
         do {
-            await setTimeout(function(){}, 1000);
+            await setTimeout(function () { }, 1000);
             let build: any = await new Promise(
                 (resolve, reject) => {
                     jenkinsInstance.queue.item(
@@ -136,10 +144,14 @@ export default async function commitTest() {
                 }
             );
             console.log(util.inspect(build, { depth: null }));
-            if (build.executable)
-                executable = build.executable;
+            if (build.executable) {
+                executable = {
+                    number: build.executable.number,
+                    url: build.executable.url
+                };
+            }
             retry--;
-        } while(executable == null || retry == 0);
+        } while (executable == null || retry == 0);
         console.log(retry, executable.number, executable.url);
 
         vscode.window.showInformationMessage(`Submitted: ${executable.url}`);
@@ -154,9 +166,9 @@ export default async function commitTest() {
         logStream.on("data", (text: string) => loggingChannel?.append(text));
         logStream.on("error", (error: Error) => {
             console.error(error);
-            running = false;
+            executable = null;
         });
-        logStream.on("end", () => { running = false; });
+        logStream.on("end", () => { executable = null; });
         loggingChannel.show();
     } catch (error) {
         console.error(error)
