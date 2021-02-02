@@ -14,6 +14,12 @@ import svn from "./svn"
 import workspace from "./workspace"
 
 //------------------------------------------------------------------------------
+//  variables
+//------------------------------------------------------------------------------
+let loggingChannel: vscode.OutputChannel | null = null;
+let running = false;
+
+//------------------------------------------------------------------------------
 //  functions
 //------------------------------------------------------------------------------
 
@@ -113,28 +119,45 @@ export default async function commitTest() {
                 )
             }
         );
+        running = true;
         console.log(`queue item: ${queueItem}`);
-        let buildUrl: string | null = null;
+        let executable: any = null;
         let retry = 30;
         do {
             await setTimeout(function(){}, 1000);
             let build: any = await new Promise(
-            (resolve, reject) => {
-                jenkinsInstance.queue.item(
-                    Number(queueItem),
-                    (error: Error, result: any) => {
-                        resolve(result);
-                    }
-                )
-            });
+                (resolve, reject) => {
+                    jenkinsInstance.queue.item(
+                        Number(queueItem),
+                        (error: Error, result: any) => {
+                            resolve(result);
+                        }
+                    )
+                }
+            );
             console.log(util.inspect(build, { depth: null }));
             if (build.executable)
-                buildUrl = build.executable.url;
+                executable = build.executable;
             retry--;
-        } while(buildUrl == null || retry == 0);
-        console.log(retry, buildUrl);
+        } while(executable == null || retry == 0);
+        console.log(retry, executable.number, executable.url);
 
-        vscode.window.showInformationMessage(`Submitted: ${buildUrl}`);
+        vscode.window.showInformationMessage(`Submitted: ${executable.url}`);
+
+        if (!loggingChannel)
+            loggingChannel = vscode.window.createOutputChannel("commit-test: jenkins logging");
+        if (loggingChannel == null) {
+            vscode.window.showErrorMessage("Failed creating output channel");
+            return;
+        }
+        let logStream = jenkinsInstance.build.logStream(job, executable.number);
+        logStream.on("data", (text: string) => loggingChannel?.append(text));
+        logStream.on("error", (error: Error) => {
+            console.error(error);
+            running = false;
+        });
+        logStream.on("end", () => { running = false; });
+        loggingChannel.show();
     } catch (error) {
         console.error(error)
         vscode.window.showWarningMessage('Failed submitting job');
