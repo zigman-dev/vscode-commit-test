@@ -181,6 +181,7 @@ export default async function commitTest() {
             result: string | null,
             ticket: string | null
         } = { result: null, ticket: null };
+        retry = 5;
         do {
             await new Promise(resolve => setTimeout(resolve, 5000));
             let build: any = await new Promise(
@@ -208,9 +209,12 @@ export default async function commitTest() {
                         ticketUrl.pathname += "artifact/ticket/*view*/"
                         buildResult.ticket = await http.download(ticketUrl);
                     }
+                    retry--;
                 }
             }
-        } while (buildResult.result == null);
+        } while (buildResult.result == null || (
+            buildResult.result == 'SUCCESS' && buildResult.ticket == null && retry > 0
+        ));
 
         executable = null;
 
