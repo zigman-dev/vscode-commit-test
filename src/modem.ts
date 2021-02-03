@@ -55,14 +55,14 @@ export default async function commitTest() {
     //---------------------
     let changelists = await svn.get_changelists(folder.uri.fsPath);
     let changelist: string | null = null;
-    if (changelists.length > 1) {
+    if (changelists.length > 0) {
         let pick = await vscode.window.showQuickPick(
-            changelists,
+            changelists.concat('<default>'),
             { placeHolder: "Pick a changelist" }
         );
         if (!pick)
-            return
-        changelist = pick
+            return;
+        changelist = pick == '<default>' ? null : pick;
     }
 
     console.log(`changelist: ${changelist}`);
