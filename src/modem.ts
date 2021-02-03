@@ -12,6 +12,7 @@ let util = require('util');
 // project
 import svn from "./svn"
 import workspace from "./workspace"
+import http from "./http"
 
 //------------------------------------------------------------------------------
 //  variables
@@ -129,10 +130,12 @@ export default async function commitTest() {
                 )
             }
         );
+
+        // Get real build from the queued item
         console.log(`queue item: ${queueItem}`);
         let retry = 30;
         do {
-            await setTimeout(function () { }, 1000);
+            await new Promise(resolve => setTimeout(resolve, 1000));
             let build: any = await new Promise(
                 (resolve, reject) => {
                     jenkinsInstance.queue.item(
@@ -156,6 +159,7 @@ export default async function commitTest() {
 
         vscode.window.showInformationMessage(`Submitted: ${executable.url}`);
 
+        // Live logging
         if (!loggingChannel)
             loggingChannel = vscode.window.createOutputChannel("commit-test: jenkins logging");
         if (loggingChannel == null) {
@@ -166,10 +170,55 @@ export default async function commitTest() {
         logStream.on("data", (text: string) => loggingChannel?.append(text));
         logStream.on("error", (error: Error) => {
             console.error(error);
-            executable = null;
         });
-        logStream.on("end", () => { executable = null; });
+        logStream.on("end", () => {});
         loggingChannel.show();
+
+        vscode.window.showInformationMessage(`Submitted: ${executable.url}`);
+
+        // Wait for completion
+        let buildResult: {
+            result: string | null,
+            ticket: string | null
+        } = { result: null, ticket: null };
+        do {
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            let build: any = await new Promise(
+                (resolve, reject) => {
+                    jenkinsInstance.build.get(
+                        job,
+                        executable?.number,
+                        (error: Error, result: any) => {
+                            resolve(result);
+                        }
+                    )
+                }
+            );
+            console.log(util.inspect(build, { depth: null }));
+            if (build.result) {
+                buildResult.result = build.result;
+                if(build.result == 'SUCCESS') {
+                    let tickets = build.artifacts.filter((v: any) => {
+                        return v.relativePath == 'ticket';
+                    });
+                    if (tickets.length > 0) {
+                        let ticketUrl = new URL(build.url);
+                        ticketUrl.username = user;
+                        ticketUrl.password = password;
+                        ticketUrl.pathname += "artifact/ticket/*view*/"
+                        buildResult.ticket = await http.download(ticketUrl);
+                    }
+                }
+            }
+        } while (buildResult.result == null);
+
+        executable = null;
+
+        console.log(buildResult);
+        let resultString = buildResult.result + (
+            buildResult.result == 'SUCCESS' ? (":" + buildResult.ticket) : ""
+        )
+        vscode.window.showInformationMessage(resultString);
     } catch (error) {
         console.error(error)
         vscode.window.showWarningMessage('Failed submitting job');
