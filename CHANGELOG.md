@@ -1,9 +1,17 @@
 # Change Log
 
-All notable changes to the "commit-test" extension will be documented in this file.
+## [Unreleased]
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+## [0.0.1] - 2021-02-04
 
-## 0.0.1
+### Added
 
-- Initial release
+*   Command "Verify Environment"
+*   Command "Submit commit-test"
+    *   Detect and let user select folders being valid `svn` workspace from
+        multi-root workspace
+    *   Let user select changelist to submit commit-test for
+    *   Status update
+        *   URL of the submitted build
+        *   Live logging on output window
+        *   Retrieve ticket on completion
