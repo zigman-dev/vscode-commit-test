@@ -4,6 +4,12 @@
 	"description": "Jenkins-based commit-test",
 	"version": "0.0.1",
 	"publisher": "zigman",
+	"homepage": "http://172.26.6.129/jy.hsu/vscode-commit-test/blob/master/README.md",
+	"icon": "images/cmgk.png",
+	"repository": {
+		"type": "git",
+		"url": "http://172.26.6.129/jy.hsu/vscode-commit-test.git"
+	},
 	"engines": {
 		"vscode": "^1.51.0"
 	},
@@ -25,7 +31,7 @@
 			},
 			{
 				"command": "commit-test.commitTest",
-				"title": "Submit commit test",
+				"title": "Submit commit-test",
 				"category": "Commit-Test"
 			}
 		],
