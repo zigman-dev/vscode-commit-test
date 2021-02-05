@@ -31,7 +31,7 @@
 			},
 			{
 				"command": "commit-test.commitTest",
-				"title": "Submit commit-test",
+				"title": "Submit Commit-Test",
 				"category": "Commit-Test"
 			}
 		],
