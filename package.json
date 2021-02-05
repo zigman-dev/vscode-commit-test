@@ -8,7 +8,7 @@
 	"icon": "images/cmgk.png",
 	"repository": {
 		"type": "git",
-		"url": "http://172.26.6.129/jy.hsu/vscode-commit-test.git"
+		"url": "https://github.com/zigman-dev/vscode-commit-test.git"
 	},
 	"engines": {
 		"vscode": "^1.51.0"
