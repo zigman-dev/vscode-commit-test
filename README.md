@@ -38,6 +38,19 @@ to the legacy [celeryd service](amqp://cmgk@172.26.6.130).
 }
 ```
 
+## Installation
+
+This extension is not pulished to official VSCode repository. Before it is made
+availabe via any repository, public or private, please install it offline.
+
+Please downalod the latest release (in `.vsix`) from the
+[release page](http://172.26.6.129/jy.hsu/vscode-commit-test/-/releases).
+Install it directly with command:
+
+```sh
+code --install-extension commit-test-0.0.1.vsix
+```
+
 ## Commands
 
 This extension provides its functionality via commands. Please find the commands
