@@ -2,7 +2,9 @@
 
 ## Integration
 
-*   [ ] Publish (with public or private registry)
+*   [ ] Publish
+    *   [ ] with public or private registry
+    *   [ ] In modem mainline documentation
 *   [ ] Logging
 *   [x] Username/password
 
@@ -27,3 +29,5 @@
 *   [ ] Select files/folders to submit
 *   [ ] Keyboard shortcut
 *   [x] Display build logging
+*   [ ] Display build activeness
+*   [ ] Provide command access via scm panel
