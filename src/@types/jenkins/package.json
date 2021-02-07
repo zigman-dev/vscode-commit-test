@@ -1,0 +1,24 @@
+{
+    "name": "@types/jenkins",
+    "version": "0.23.1",
+    "description": "TypeScript definitions for jenkins",
+    "license": "MIT",
+    "contributors": [
+        {
+            "name": "rhysd",
+            "url": "https://rhysd.github.io"
+        }
+    ],
+    "main": "",
+    "types": "index",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git"
+    },
+    "scripts": {},
+    "dependencies": {
+        "@types/node": "*"
+    },
+    "typesPublisherContentHash": "ba6795cf143b1b536283a0666547a84ea73091601fff58eca62935106dd786c1",
+    "typeScriptVersion": "2.0"
+}
