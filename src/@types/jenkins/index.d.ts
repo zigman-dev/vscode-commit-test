@@ -135,12 +135,14 @@ declare module 'jenkins' {
             baseUrl?: string;
             crumbIssuer?: boolean;
             headers?: any;
+            formData?: any;
             promisify?: false;
         }): create.JenkinsAPI;
     function create(opts: {
             baseUrl?: string;
             crumbIssuer?: boolean;
             headers?: any;
+            formData?: any;
             promisify: true;
         }): create.JenkinsPromisifiedAPI;
     export = create;
