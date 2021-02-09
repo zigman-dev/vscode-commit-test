@@ -72,7 +72,7 @@ declare module 'jenkins' {
             build: {
                 get(name: string, n: number): Promise<any>;
                 log(name: string, n: number, start?: number, type?: 'text' | 'html', meta?: boolean): Promise<any>;
-                logStream(name: string, n: number, type?: 'text' | 'html', delay?: number): Promise<any>;
+                logStream(name: string, n: number, type?: 'text' | 'html', delay?: number): Promise<NodeJS.ReadableStream>;
                 stop(name: string, n: number): Promise<void>;
                 term(name: string, n: number): Promise<void>;
             };

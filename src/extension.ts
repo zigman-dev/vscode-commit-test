@@ -1,16 +1,15 @@
 import * as vscode from 'vscode';
 
 import verifyEnvironment from "./verify";
-import commitTest from "./modem";
+import * as modem from "./modem";
 
 export function activate(context: vscode.ExtensionContext) {
-
-    console.log("activate()")
-
     context.subscriptions.push(vscode.commands.registerCommand(
         'commit-test.verifyEnvironment', verifyEnvironment));
     context.subscriptions.push(vscode.commands.registerCommand(
-        'commit-test.commitTest', commitTest));
+        'commit-test.commitTest', modem.commitTest));
+    context.subscriptions.push(vscode.commands.registerCommand(
+        'commit-test.commitTestChangelist', modem.commitTestChangelist));
 }
 
 // this method is called when your extension is deactivated

@@ -7,6 +7,15 @@ import jenkins from 'jenkins';
 
 let util = require('util');
 
+// project
+import http from "./http"
+
+//------------------------------------------------------------------------------
+type BuildResult = {
+    result: string,
+    artifact: string | null
+};
+
 //------------------------------------------------------------------------------
 //  variables
 //------------------------------------------------------------------------------
@@ -23,8 +32,12 @@ let executable: {
 export async function submitBuild(
     scope: vscode.Uri | vscode.WorkspaceFolder,
     job: string,
-    parameters: any): Promise<string> {
-
+    parameters: any,
+    artifact?: string
+): Promise<BuildResult> {
+    //---------------------
+    //   configurations
+    //---------------------
     let config = vscode.workspace.getConfiguration(
         "commit-test.jenkins",
         scope
@@ -51,12 +64,17 @@ export async function submitBuild(
             promisify: true
         })
 
+        //---------------------
+        //    submit build
+        //---------------------
         let queueItem = await jenkinsInstance.job.build({
             name: job,
             parameters
         });
 
-        // Get real build from the queued item
+        //---------------------
+        //   get real build
+        //---------------------
         console.log(`queue item: ${queueItem}`);
         let retry = 30;
         do {
@@ -77,12 +95,14 @@ export async function submitBuild(
 
         vscode.window.showInformationMessage(`Submitted: ${executable.url}`);
 
-        // Live logging
+        //---------------------
+        //    Live logging
+        //---------------------
         if (!loggingChannel)
             loggingChannel = vscode.window.createOutputChannel("commit-test: jenkins logging");
         if (loggingChannel == null)
             return Promise.reject(new Error("Failed creating output channel"));
-        let logStream = jenkinsInstance.build.logStream(job, executable.number);
+        let logStream = await jenkinsInstance.build.logStream(job, executable.number);
         logStream.on("data", (text: string) => loggingChannel?.append(text));
         logStream.on("error", (error: Error) => {
             console.error(error);
@@ -92,8 +112,10 @@ export async function submitBuild(
 
         vscode.window.showInformationMessage(`Submitted: ${executable.url}`);
 
+        //---------------------
         // Wait for completion
-        let buildResult: string | null = null;
+        //---------------------
+        let buildResult: BuildResult | null = null;
         do {
             await new Promise(resolve => setTimeout(resolve, 5000));
             let build: any = await jenkinsInstance.build.get(
@@ -101,7 +123,28 @@ export async function submitBuild(
                 executable?.number
             );
             console.log(util.inspect(build, { depth: null }));
-        } while (buildResult == null);
+            if (build.result) {
+                buildResult = {
+                    result: build.result,
+                    artifact: null
+                };
+                if (build.result == 'SUCCESS' && artifact) {
+                    let artifacts = build.artifacts.filter((v: any) => {
+                        return v.relativePath == artifact;
+                    });
+                    if (artifacts.length > 0) {
+                        let artifactUrl = new URL(build.url);
+                        artifactUrl.username = user;
+                        artifactUrl.password = password;
+                        artifactUrl.pathname += `artifact/${artifact}/*view*/`
+                        buildResult.artifact = await http.download(artifactUrl);
+                    }
+                    retry--;
+                }
+            }
+        } while (buildResult == null || (
+            buildResult.result == 'SUCCESS' && artifact && buildResult.artifact == null && retry > 0
+        ));
 
         executable = null;
 

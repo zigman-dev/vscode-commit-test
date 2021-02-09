@@ -13,6 +13,7 @@ let util = require('util');
 import svn from "./svn"
 import workspace from "./workspace"
 import http from "./http"
+import { submitBuild } from "./jenkins"
 
 //------------------------------------------------------------------------------
 //  variables
@@ -30,7 +31,79 @@ let executable: {
 //------------------------------------------------------------------------------
 //  interface
 //------------------------------------------------------------------------------
-export default async function commitTest() {
+//export default { commitTest, commitTestChangelist }
+
+//------------------------------------------------------------------------------
+export async function commitTestChangelist(
+    resourceGroup: vscode.SourceControlResourceGroup
+) {
+    console.log("commitTestChangelist()");
+
+    if (!resourceGroup)
+        return;
+
+    console.log(resourceGroup);
+
+    if (resourceGroup.resourceStates.length == 0) {
+        vscode.window.showWarningMessage("Empty changelist");
+        return;
+    }
+
+    let changelist = resourceGroup.id.startsWith("changelist-") ?
+        resourceGroup.id.replace(/^changelist-/, "") :
+        null;
+
+    //---------------------
+    //   generate patch
+    //---------------------
+    // The svn workspace is where the 1st resource resides
+    let folder = vscode.workspace.getWorkspaceFolder(
+        resourceGroup.resourceStates[0].resourceUri
+    );
+    if (!folder) {
+        vscode.window.showErrorMessage("Invalid folder");
+        return;
+    }
+    let cwd = process.cwd()
+    process.chdir(folder.uri.fsPath);
+    let diff = await svn.get_patch(".", changelist);
+    process.chdir(cwd);
+    console.log(diff);
+
+    //---------------------
+    //  submit to Jenkins
+    //---------------------
+    let config = vscode.workspace.getConfiguration(
+        "commit-test.jenkins",
+        folder
+    );
+    let job = config.get<string>("jobName");
+
+    if(!job) {
+        vscode.window.showErrorMessage("Invalid jobName");
+        return;
+    }
+
+    let mail = config.get<string>("account.mail");
+
+    let parameters: any = {
+        patch: Buffer.from(diff)
+    }
+    if (mail)
+        parameters.mail = mail;
+
+    let result = await submitBuild(folder, job, parameters, 'ticket');
+
+    console.log(result);
+
+    let resultString = result.result + (
+        result.result == 'SUCCESS' ? (":" + result.artifact) : ""
+    )
+    vscode.window.showInformationMessage(resultString);
+}
+
+//------------------------------------------------------------------------------
+export async function commitTest() {
     console.log("commitTest()")
 
     if (executable != null) {
@@ -171,7 +244,7 @@ export default async function commitTest() {
         logStream.on("error", (error: Error) => {
             console.error(error);
         });
-        logStream.on("end", () => {});
+        logStream.on("end", () => { });
         loggingChannel.show();
 
         vscode.window.showInformationMessage(`Submitted: ${executable.url}`);
@@ -198,7 +271,7 @@ export default async function commitTest() {
             console.log(util.inspect(build, { depth: null }));
             if (build.result) {
                 buildResult.result = build.result;
-                if(build.result == 'SUCCESS') {
+                if (build.result == 'SUCCESS') {
                     let tickets = build.artifacts.filter((v: any) => {
                         return v.relativePath == 'ticket';
                     });

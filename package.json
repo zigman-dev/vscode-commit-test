@@ -2,7 +2,7 @@
 	"name": "commit-test",
 	"displayName": "commit-test",
 	"description": "Jenkins-based commit-test",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"publisher": "zigman",
 	"homepage": "http://172.26.6.129/jy.hsu/vscode-commit-test/blob/master/README.md",
 	"icon": "images/cmgk.png",
@@ -18,7 +18,8 @@
 	],
 	"activationEvents": [
 		"onCommand:commit-test.verifyEnvironment",
-		"onCommand:commit-test.commitTest"
+		"onCommand:commit-test.commitTest",
+		"onCommand:commit-test.commitTestChangelist"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -33,8 +34,28 @@
 				"command": "commit-test.commitTest",
 				"title": "Submit Commit-Test",
 				"category": "Commit-Test"
+			},
+			{
+				"command": "commit-test.commitTestChangelist",
+				"title": "Submit Commit-Test for Changelist",
+				"category": "Commit-Test"
 			}
 		],
+		"menus": {
+			"commandPalette": [
+				{
+					"command": "commit-test.commitTestChangelist",
+					"when": "false"
+				}
+			],
+			"scm/resourceGroup/context": [
+				{
+					"command": "commit-test.commitTestChangelist",
+					"when": "config.svn.enabled && scmProvider == svn",
+					"group": "navigation"
+				}
+			]
+		},
 		"configuration": {
 			"title": "Commit-Test",
 			"properties": {
@@ -90,8 +111,8 @@
 		"vscode-test": "^1.4.0"
 	},
 	"dependencies": {
-		"jenkins": "^0.28.1",
 		"form-data": "^3.0.0",
+		"jenkins": "^0.28.1",
 		"svn-interface": "^0.5.0"
 	}
 }
