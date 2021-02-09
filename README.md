@@ -24,17 +24,23 @@ to the legacy [celeryd service](amqp://cmgk@172.26.6.130).
 
 ```json
 {
-    // Valid account which can login to the Jenkins service (usually your NT account), mandatory
-    "commi-test.jenkins.account.user": "your.name",
-    "commi-test.jenkins.account.password": "password",
+    "commi-test": {
+        "jenkins": {
+            "account": {
+                // Valid account which can login to the Jenkins service (usually your NT account), mandatory
+                "user": "your.name",
+                "password": "password",
 
-    // Mail address to send notification to, optional
-    "commi-test.jenkins.account.mail": "your.mail@realtek.com",
+                // Mail address to send notification to, optional
+                "mail": "your.mail@realtek.com",
+            },
 
-    // Jenkins host and job to submit test to, optional and default to the following value.
-    // Use default (just leave them undefined) unless you know what you are doing.
-    "commi-test.jenkins.hostAddress": "http://172.26.6.130:8080",
-    "commi-test.jenkins.jobName": "mainline/commit_test"
+            // Jenkins host and job to submit test to, optional and default to the following value.
+            // Use default (just leave them undefined) unless you know what you are doing.
+            "hostAddress": "http://172.26.6.130:8080",
+            "jobName": "mainline/commit_test"
+        }
+    }
 }
 ```
 
