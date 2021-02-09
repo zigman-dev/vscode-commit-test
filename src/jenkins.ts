@@ -11,10 +11,14 @@ let util = require('util');
 import http from "./http"
 
 //------------------------------------------------------------------------------
+//  types
+//------------------------------------------------------------------------------
 type BuildResult = {
     result: string,
     artifact: string | null
 };
+
+export class BuildError extends Error {};
 
 //------------------------------------------------------------------------------
 //  variables
@@ -35,6 +39,15 @@ export async function submitBuild(
     parameters: any,
     artifact?: string
 ): Promise<BuildResult> {
+
+    if (executable != null) {
+        return Promise.reject(
+            new BuildError(
+                `A build is already submitted and not finished yet (${executable.url})`
+            )
+        );
+    }
+
     //---------------------
     //   configurations
     //---------------------
@@ -47,10 +60,10 @@ export async function submitBuild(
     let host = config.get<string>("hostAddress");
 
     if (!host)
-        return Promise.reject(new Error("Missing host URL"));
+        return Promise.reject(new BuildError("Missing host URL"));
 
     if (!user || !password)
-        return Promise.reject(new Error("Missing username/password"));
+        return Promise.reject(new BuildError("Missing username/password"));
 
     let url = new URL(host);
     url.username = user;
@@ -89,7 +102,7 @@ export async function submitBuild(
             }
             retry--;
             if (retry == 0)
-                return Promise.reject(new Error(`Failed to retrieve queued item ${queueItem}`));
+                return Promise.reject(new BuildError(`Failed to retrieve queued item ${queueItem}`));
         } while (executable == null || executable.number == null || retry == 0);
         console.log(retry, executable.number, executable.url);
 
@@ -101,7 +114,7 @@ export async function submitBuild(
         if (!loggingChannel)
             loggingChannel = vscode.window.createOutputChannel("commit-test: jenkins logging");
         if (loggingChannel == null)
-            return Promise.reject(new Error("Failed creating output channel"));
+            return Promise.reject(new BuildError("Failed creating output channel"));
         let logStream = await jenkinsInstance.build.logStream(job, executable.number);
         logStream.on("data", (text: string) => loggingChannel?.append(text));
         logStream.on("error", (error: Error) => {
