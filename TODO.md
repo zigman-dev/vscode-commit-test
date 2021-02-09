@@ -14,7 +14,7 @@
 
 ### Machanism
 
-*   [ ] Get ticket directly
+*   [x] Get ticket directly
 *   [x] Submit diff without saving diff as file
 *   [ ] Replace npm `jenkins` with pure HTTP module
 *   [x] Support changelist
@@ -22,12 +22,14 @@
     *   [ ] Start from exclusive
     *   [ ] Support stop/terminate
     *   [ ] Multiple sessions
+*   [ ] Invalidate ticket on change
 
 ### UI
 
 *   [ ] Progress update
-*   [ ] Select files/folders to submit
+*   [x] Select files/folders to submit
 *   [ ] Keyboard shortcut
 *   [x] Display build logging
 *   [ ] Display build activeness
-*   [ ] Provide command access via scm panel
+*   [x] Provide command access via scm panel
+*   [ ] Indicate ticket availability
