@@ -12,29 +12,61 @@ import workspace from "./workspace"
 import { submitBuild, BuildError } from "./jenkins"
 
 //------------------------------------------------------------------------------
-//  variables
+//  types
 //------------------------------------------------------------------------------
-let loggingChannel: vscode.OutputChannel | null = null;
-let executable: {
-    number: number | null,
-    url: string
-} | null = null;
 
 //------------------------------------------------------------------------------
-//  functions
+//  variables
 //------------------------------------------------------------------------------
+// FIXME: We attempted to make this a class, but calling methods from commands
+//        seems awaiting some promise to get resolved, weird..
+let tickets: Record<string, string> = {};
 
 //------------------------------------------------------------------------------
 //  interface
 //------------------------------------------------------------------------------
-//export default { commitTest, commitTestChangelist }
+export default { commitTest, commitTestChangelist, getTicketChangelist }
 
 //------------------------------------------------------------------------------
-export async function commitTestChangelist(
+async function getTicketChangelist(
     resourceGroup: vscode.SourceControlResourceGroup
 ) {
-    console.log("commitTestChangelist()");
+    // FIXME:
+    //   1. Support empty change list
+    //   2. DRY the following
+    if (!resourceGroup)
+        return;
 
+    console.log(resourceGroup);
+
+    if (resourceGroup.resourceStates.length == 0) {
+        vscode.window.showWarningMessage("Empty changelist");
+        return;
+    }
+
+    let changelist = resourceGroup.id.startsWith("changelist-") ?
+        resourceGroup.id.replace(/^changelist-/, "") :
+        null;
+
+    // The svn workspace is where the 1st resource resides
+    let folder = vscode.workspace.getWorkspaceFolder(
+        resourceGroup.resourceStates[0].resourceUri
+    );
+    if (!folder) {
+        vscode.window.showErrorMessage("Invalid folder");
+        return;
+    }
+    console.log(folder, changelist);
+    let ticket = tickets[folder + '/' + (changelist ? changelist : '<default>')];
+    console.log(folder, changelist, ticket);
+    vscode.window.showInformationMessage(ticket ? ticket : 'n/a');
+}
+
+
+//------------------------------------------------------------------------------
+async function commitTestChangelist(
+    resourceGroup: vscode.SourceControlResourceGroup
+) {
     if (!resourceGroup)
         return;
 
@@ -74,7 +106,7 @@ export async function commitTestChangelist(
         folder
     );
     let job = config.get<string>("jobName");
-    if(!job) {
+    if (!job) {
         vscode.window.showErrorMessage("Invalid jobName");
         return;
     }
@@ -89,6 +121,8 @@ export async function commitTestChangelist(
     try {
         let result = await submitBuild(folder, job, parameters, 'ticket');
         console.log(result);
+        if (result.artifact)
+            tickets[folder + '/' + (changelist ? changelist : '<default>')] = result.artifact;
         let resultString = result.result + (
             result.result == 'SUCCESS' ? (":" + result.artifact) : ""
         )
@@ -103,7 +137,7 @@ export async function commitTestChangelist(
 }
 
 //------------------------------------------------------------------------------
-export async function commitTest() {
+async function commitTest() {
 
     //------------------------
     //  select svn workspace
@@ -150,7 +184,7 @@ export async function commitTest() {
         folder
     );
     let job = config.get<string>("jobName");
-    if(!job) {
+    if (!job) {
         vscode.window.showErrorMessage("Invalid jobName");
         return;
     }
@@ -164,6 +198,8 @@ export async function commitTest() {
     try {
         let result = await submitBuild(folder, job, parameters, 'ticket');
         console.log(result);
+        if (result.artifact)
+            tickets[folder + '/' + (changelist ? changelist : '<default>')] = result.artifact;
         let resultString = result.result + (
             result.result == 'SUCCESS' ? (":" + result.artifact) : ""
         )

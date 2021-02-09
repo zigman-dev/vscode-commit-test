@@ -19,7 +19,8 @@
 	"activationEvents": [
 		"onCommand:commit-test.verifyEnvironment",
 		"onCommand:commit-test.commitTest",
-		"onCommand:commit-test.commitTestChangelist"
+		"onCommand:commit-test.commitTestChangelist",
+		"onCommand:commit-test.getTicketChangelist"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -39,6 +40,11 @@
 				"command": "commit-test.commitTestChangelist",
 				"title": "Submit Commit-Test for Changelist",
 				"category": "Commit-Test"
+			},
+			{
+				"command": "commit-test.getTicketChangelist",
+				"title": "Get Ticket for Changlist",
+				"category": "Commit-Test"
 			}
 		],
 		"menus": {
@@ -46,11 +52,20 @@
 				{
 					"command": "commit-test.commitTestChangelist",
 					"when": "false"
+				},
+				{
+					"command": "commit-test.getTicketChangelist",
+					"when": "false"
 				}
 			],
 			"scm/resourceGroup/context": [
 				{
 					"command": "commit-test.commitTestChangelist",
+					"when": "config.svn.enabled && scmProvider == svn",
+					"group": "navigation"
+				},
+				{
+					"command": "commit-test.getTicketChangelist",
 					"when": "config.svn.enabled && scmProvider == svn",
 					"group": "navigation"
 				}
