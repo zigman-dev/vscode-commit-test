@@ -14,13 +14,23 @@ import { submitBuild, BuildError } from "./jenkins"
 //------------------------------------------------------------------------------
 //  types
 //------------------------------------------------------------------------------
+class Tickets {
+    tickets: Record<string, string> = {};
+    private key(folder: string, changelist: string | null): string {
+        return folder + '/' + (changelist ? changelist : '<default>');
+    }
+    save(folder: string, changelist: string | null, ticket: string) {
+        this.tickets[this.key(folder, changelist)] = ticket;
+    }
+    retrievesss(folder: string, changelist: string | null): string { 
+        return this.tickets[this.key(folder, changelist)];
+    }
+};
 
 //------------------------------------------------------------------------------
 //  variables
 //------------------------------------------------------------------------------
-// FIXME: We attempted to make this a class, but calling methods from commands
-//        seems awaiting some promise to get resolved, weird..
-let tickets: Record<string, string> = {};
+let tickets = new Tickets;
 
 //------------------------------------------------------------------------------
 //  interface
@@ -57,7 +67,7 @@ async function getTicketChangelist(
         return;
     }
     console.log(folder, changelist);
-    let ticket = tickets[folder + '/' + (changelist ? changelist : '<default>')];
+    let ticket = tickets.retrievesss(folder.name, changelist);
     console.log(folder, changelist, ticket);
     vscode.window.showInformationMessage(ticket ? ticket : 'n/a');
 }
@@ -122,7 +132,7 @@ async function commitTestChangelist(
         let result = await submitBuild(folder, job, parameters, 'ticket');
         console.log(result);
         if (result.artifact)
-            tickets[folder + '/' + (changelist ? changelist : '<default>')] = result.artifact;
+            tickets.save(folder.name, changelist, result.artifact);
         let resultString = result.result + (
             result.result == 'SUCCESS' ? (":" + result.artifact) : ""
         )
@@ -199,7 +209,7 @@ async function commitTest() {
         let result = await submitBuild(folder, job, parameters, 'ticket');
         console.log(result);
         if (result.artifact)
-            tickets[folder + '/' + (changelist ? changelist : '<default>')] = result.artifact;
+            tickets.save(folder.name, changelist, result.artifact);
         let resultString = result.result + (
             result.result == 'SUCCESS' ? (":" + result.artifact) : ""
         )
