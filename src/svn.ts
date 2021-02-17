@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 let svn = require('svn-interface')
 
-export default {is_workspace, get_changelists, get_patch};
+export default { is_workspace, get_changelists, get_patch };
 
 //------------------------------------------------------------------------------
 //  interface
