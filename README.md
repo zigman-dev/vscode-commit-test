@@ -130,6 +130,21 @@ Selecting folder has two meanings:
     workspace) not only determines the settings to use, but where to gather
     diff/patch to submit commit-test for.
 
+## Limitations
+
+*   Ticket availability indicator cannot distinguish different `svn` folders in
+    a multi-root workspace. That is, if we have two changelists in folder `foo`
+    and `bar` both named `my-fance-cl` and the one in folder `foo` got ticket,
+    the `my-fancy-cl` changerlist will also have ticket availability indicated.
+
+    > Default changelists in different `svn` folders, unfortunately, have
+    > identical names.
+
+    But don't worry that the tickets are associated with wrong changelists. The
+    ticket will only be responded for the changelist that really owns one (that
+    is, the one in folder `foo` in the above case), the changelist that does not
+    own a ticket responds "n/a".
+
 ## Release Notes
 
 See [CHANGELOG.md](CHANGELOG.md)

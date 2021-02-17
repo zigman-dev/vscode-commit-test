@@ -44,7 +44,8 @@
 			{
 				"command": "commit-test.getTicketChangelist",
 				"title": "Get Ticket for Changlist",
-				"category": "Commit-Test"
+				"category": "Commit-Test",
+				"icon": "$(bookmark)"
 			}
 		],
 		"menus": {
@@ -66,8 +67,8 @@
 				},
 				{
 					"command": "commit-test.getTicketChangelist",
-					"when": "config.svn.enabled && scmProvider == svn",
-					"group": "navigation"
+					"when": "config.svn.enabled && scmProvider == svn && scmResourceGroup in commit-test:tickets",
+					"group": "inline"
 				}
 			]
 		},

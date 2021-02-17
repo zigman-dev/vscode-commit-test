@@ -16,13 +16,16 @@ import { submitBuild, BuildError } from "./jenkins"
 //------------------------------------------------------------------------------
 class Tickets {
     tickets: Record<string, string> = {};
+    context: Record<string, boolean> = {};
     private key(folder: string, changelist: string | null): string {
         return folder + '/' + (changelist ? changelist : '<default>');
     }
-    save(folder: string, changelist: string | null, ticket: string) {
+    save(folder: string, changelist: string, ticket: string) {
         this.tickets[this.key(folder, changelist)] = ticket;
+        this.context[changelist] = true;
+        vscode.commands.executeCommand('setContext', 'commit-test:tickets', this.context);
     }
-    retrievesss(folder: string, changelist: string | null): string { 
+    retrieve(folder: string, changelist: string): string {
         return this.tickets[this.key(folder, changelist)];
     }
 };
@@ -54,10 +57,6 @@ async function getTicketChangelist(
         return;
     }
 
-    let changelist = resourceGroup.id.startsWith("changelist-") ?
-        resourceGroup.id.replace(/^changelist-/, "") :
-        null;
-
     // The svn workspace is where the 1st resource resides
     let folder = vscode.workspace.getWorkspaceFolder(
         resourceGroup.resourceStates[0].resourceUri
@@ -66,9 +65,9 @@ async function getTicketChangelist(
         vscode.window.showErrorMessage("Invalid folder");
         return;
     }
-    console.log(folder, changelist);
-    let ticket = tickets.retrievesss(folder.name, changelist);
-    console.log(folder, changelist, ticket);
+    console.log(folder);
+    let ticket = tickets.retrieve(folder.name, resourceGroup.id);
+    console.log(ticket);
     vscode.window.showInformationMessage(ticket ? ticket : 'n/a');
 }
 
@@ -132,7 +131,7 @@ async function commitTestChangelist(
         let result = await submitBuild(folder, job, parameters, 'ticket');
         console.log(result);
         if (result.artifact)
-            tickets.save(folder.name, changelist, result.artifact);
+            tickets.save(folder.name, resourceGroup.id, result.artifact);
         let resultString = result.result + (
             result.result == 'SUCCESS' ? (":" + result.artifact) : ""
         )
@@ -208,8 +207,13 @@ async function commitTest() {
     try {
         let result = await submitBuild(folder, job, parameters, 'ticket');
         console.log(result);
-        if (result.artifact)
-            tickets.save(folder.name, changelist, result.artifact);
+        if (result.artifact) {
+            tickets.save(
+                folder.name,
+                changelist ? `changelist-${changelist}` : "changes",
+                result.artifact
+            );
+        }
         let resultString = result.result + (
             result.result == 'SUCCESS' ? (":" + result.artifact) : ""
         )
