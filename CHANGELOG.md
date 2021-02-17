@@ -7,7 +7,7 @@
 ### Added
 
 *   Command "Verify Environment"
-*   Command "Submit commit-test"
+*   Command "Submit Commit-Test"
     *   Detect and let user select folders being valid `svn` workspace from
         multi-root workspace
     *   Let user select changelist to submit commit-test for
@@ -15,3 +15,12 @@
         *   URL of the submitted build
         *   Live logging on output window
         *   Retrieve ticket on completion
+
+## [0.0.2] - 2021-02-17
+
+### Added
+
+*   Commands issued from source control view
+    *   "Submit Commit for Changelist"
+    *   "Get Ticket for Changelist"
+        *   Accessible while ticket is available
