@@ -12,13 +12,19 @@ to the legacy [celeryd service](amqp://cmgk@172.26.6.130).
 
 ## Features
 
-*   Support multi-root VSCode workspace
-    *   Let user select a folder with valid `svn` workspace among those detected
 *   Support `svn` changelist
     *   Let user select a changelist (or default) to submit test for
+
+    > The operations of changelists, such as creation, moving files, removal or
+    > committing, are still left to the `svn` client you use.
+
 *   Status update
     *   Live Jenkins logging on a dedicated output window
     *   Retrieve ticket on completion
+*   Support multi-root VSCode workspace
+    *   Explicitly, by letting user select a folder with valid `svn` workspace
+        among those detected
+    *   Or implicitly, by starting test against the selected changelist
 
 ## Extension Settings
 
@@ -57,10 +63,39 @@ Install it directly with command:
 code --install-extension commit-test-0.0.1.vsix
 ```
 
+## Basic Usage
+
+The easiest way to use the extension is to submit commit-test by clicking the
+`Submit Commit-Test for Changelist` icon of the target changelist:
+
+![Submit](images/submit-for-cl.png)
+
+Wait several seconds for the extension to submit diff/patch of the change list
+to Jenkins. Once successfully submitted, a notification will be popped up to
+inform URL of the Jenkins build, and a output console will update the Jenkins
+console:
+
+![Submitted](images/submitted.png)
+
+On completion, the result will be informed with a notification. In case of
+`SUCCESS`, there are several ways to get the ticket issued:
+
+*   The complete notification contains the ticket
+*   Changelists with ticket available are labeled a bookmark icon (corresponding
+    to `Get Ticket for Changelist` command), click it to query the ticket
+
+    > See the [limitations](#Limitations)
+
+*   Ticket can also be found in Jenkins log (either in the output console or
+    Jenkins web)
+*   Mail notification, sent to the mail address in
+
+![ticket](images/success.png)
+
 ## Commands
 
-This extension provides its functionality via commands. Please find the commands
-under "Commit-Test" category from command palette
+There are also commands (under "Commit-Test" category) which can be launched
+from the command palette
 (<kbd>ctrl</kbd>+<kbd>shift</kbd>+<kbd>p</kbd>).
 
 ![Commands](images/commands.png)
@@ -75,35 +110,17 @@ displayed with notification.
 
 ### `Submit Commit-Test`
 
-This is the main command for this extension (more will come in the future..
-:coffee:).
-
-By default, it submits diff of the `svn` workspace in question to our Jenkins
-service. If successfully submitted, a notification will be popped up to inform
-URL of the Jenkins build:
-
-![submitted](images/submitted.png)
-
-and a output console will update the Jenkins console:
-
-![console-log](images/console-log.png)
-
-On completion, the result will be informed with a notification. In case of
-`SUCCESS`, the ticket will be contained.
-
-![ticket](images/ticket.png)
-
-If you somehow missed the notification, find the ticket in Jenkins log (either
-in the output console or Jenkins web) or the mail notification.
+This is an alternative way to submit commit-test. The difference is in that
+`svn` folder and changelist to submit commit-test for are selected with quick
+pick (if selection is necessary).
 
 ## `svn` changelist support
 
 `svn` supports [changelists](http://svnbook.red-bean.com/en/1.6/svn.advanced.changelists.html)
-to manage multiple changes within a single workspace. `Submit Commit-Test`
-supports submitting diff/patch of specific changelist (or default) by offering
-selection of changelist in case at least one changelist exists:
-
-![changelists](images/changelists.png)
+to manage multiple changes within a single workspace. Both
+`Submit Commit-Test for Changelist` and `Submit Commit-Test` commands support
+submitting diff/patch of specific changelist (or default) by offering selection
+of changelist (in case at least one changelist exists for `Submit Commit-Test`).
 
 But the operations of changelists, such as creation, moving files, removal or
 committing, are still left to the `svn` client you use. Just remember to commit
@@ -111,11 +128,12 @@ the changelist you submit commit-test for.
 
 ## Multi-root workspace support
 
-This extension is aware of [multi-root workspace](https://code.visualstudio.com/docs/editor/multi-root-workspaces).
-While more than one folders under the multi-root workspace is applicable to the
-command issued, a prompt will be popped up to ask for the folder to work with.
+This extension is aware of
+[multi-root workspace](https://code.visualstudio.com/docs/editor/multi-root-workspaces).
 
-![folders](images/folders.png)
+> For `Submit Commit-Test` command, while more than one folders under the
+> multi-root workspace is applicable to the command issued, a prompt will be
+> popped up to ask for the folder to work with.
 
 Selecting folder has two meanings:
 
