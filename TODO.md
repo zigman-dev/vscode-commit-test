@@ -32,4 +32,4 @@
 *   [x] Display build logging
 *   [ ] Display build activeness
 *   [x] Provide command access via scm panel
-*   [ ] Indicate ticket availability
+*   [x] Indicate ticket availability
