@@ -39,7 +39,8 @@
 			{
 				"command": "commit-test.commitTestChangelist",
 				"title": "Submit Commit-Test for Changelist",
-				"category": "Commit-Test"
+				"category": "Commit-Test",
+				"icon": "$(run)"
 			},
 			{
 				"command": "commit-test.getTicketChangelist",
@@ -63,7 +64,7 @@
 				{
 					"command": "commit-test.commitTestChangelist",
 					"when": "config.svn.enabled && scmProvider == svn",
-					"group": "navigation"
+					"group": "inline"
 				},
 				{
 					"command": "commit-test.getTicketChangelist",
