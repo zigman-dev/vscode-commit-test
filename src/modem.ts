@@ -2,7 +2,7 @@
 //  dependencies
 //------------------------------------------------------------------------------
 import { URL } from 'url';
-import * as vscode from 'vscode';
+import vscode from 'vscode';
 
 let util = require('util');
 
@@ -15,17 +15,74 @@ import { submitBuild, BuildError } from "./jenkins"
 //  types
 //------------------------------------------------------------------------------
 class Tickets {
-    tickets: Record<string, string> = {};
-    context: Record<string, boolean> = {};
-    private key(folder: string, changelist: string | null): string {
+    private tickets: Record<string, string> = {}
+    private context: Record<
+        string,
+        {
+            folder: vscode.WorkspaceFolder,
+            files: vscode.Uri[]
+        }
+    > = {};
+    private watchers: Record<string, vscode.FileSystemWatcher> = {};
+
+    private key(
+        folder: vscode.WorkspaceFolder,
+        changelist: string | null
+    ): string {
         return folder + '/' + (changelist ? changelist : '<default>');
     }
-    save(folder: string, changelist: string, ticket: string) {
-        this.tickets[this.key(folder, changelist)] = ticket;
-        this.context[changelist] = true;
-        vscode.commands.executeCommand('setContext', 'commit-test:tickets', this.context);
+
+    private handler = (uri: vscode.Uri) => {
+        let toInvalidate: { folder: vscode.WorkspaceFolder, changelist: string }[] = [];
+        try {
+            for (let changelist in this.context) {
+                let entry = this.context[changelist];
+                if (entry.files.some((file: vscode.Uri) => file.path == uri.path))
+                    toInvalidate.push({ folder: entry.folder, changelist });
+            }
+        } catch (error) {
+            console.error(error);
+        }
+        for (let entry of toInvalidate) {
+            console.log(`Invalidate ticket for ${entry.folder}/${entry.changelist}`);
+            this.remove(entry.folder, entry.changelist);
+        }
     }
-    retrieve(folder: string, changelist: string): string {
+    private watchFolder(folder: vscode.WorkspaceFolder) {
+        if (!this.watchers[folder.uri.fsPath]) {
+            console.log("Create watcher for: ", folder.uri.fsPath);
+            this.watchers[folder.uri.fsPath] = vscode.workspace.createFileSystemWatcher(
+                new vscode.RelativePattern(folder.uri.fsPath, "**")
+            );
+            let watcher = this.watchers[folder.uri.fsPath];
+            watcher.onDidChange(this.handler);
+            watcher.onDidDelete(this.handler);
+            watcher.onDidCreate(this.handler); // FIXME: Do we need to watch create?
+        }
+    }
+
+    save(
+        folder: vscode.WorkspaceFolder,
+        changelist: string,
+        ticket: string,
+        files: vscode.Uri[]
+    ) {
+        this.tickets[this.key(folder, changelist)] = ticket;
+        this.context[changelist] = { folder, files };
+        vscode.commands.executeCommand('setContext', 'commit-test:tickets', this.context);
+        console.log("context:", this.context);
+        this.watchFolder(folder);
+    }
+    remove(
+        folder: vscode.WorkspaceFolder,
+        changelist: string,
+    ) {
+        delete this.tickets[this.key(folder, changelist)];
+        delete this.context[changelist];
+        vscode.commands.executeCommand('setContext', 'commit-test:tickets', this.context);
+        console.log("context:", this.context);
+    }
+    retrieve(folder: vscode.WorkspaceFolder, changelist: string): string {
         return this.tickets[this.key(folder, changelist)];
     }
 };
@@ -66,7 +123,7 @@ async function getTicketChangelist(
         return;
     }
     console.log(folder);
-    let ticket = tickets.retrieve(folder.name, resourceGroup.id);
+    let ticket = tickets.retrieve(folder, resourceGroup.id);
     console.log(ticket);
     vscode.window.showInformationMessage(ticket ? ticket : 'n/a');
 }
@@ -130,8 +187,14 @@ async function commitTestChangelist(
     try {
         let result = await submitBuild(folder, job, parameters, 'ticket');
         console.log(result);
-        if (result.artifact)
-            tickets.save(folder.name, resourceGroup.id, result.artifact);
+        if (result.artifact) {
+            tickets.save(
+                folder,
+                resourceGroup.id,
+                result.artifact,
+                resourceGroup.resourceStates.map(s => s.resourceUri)
+            );
+        }
         let resultString = result.result + (
             result.result == 'SUCCESS' ? (":" + result.artifact) : ""
         )
@@ -209,9 +272,10 @@ async function commitTest() {
         console.log(result);
         if (result.artifact) {
             tickets.save(
-                folder.name,
+                folder,
                 changelist ? `changelist-${changelist}` : "changes",
-                result.artifact
+                result.artifact,
+                [] // FIXME: Supply valid file list
             );
         }
         let resultString = result.result + (
