@@ -4,7 +4,7 @@
 
 *   [ ] Publish
     *   [ ] with public or private registry
-    *   [ ] In modem mainline documentation
+    *   [x] In modem mainline documentation
 *   [ ] Logging
 *   [x] Username/password
 
@@ -22,7 +22,7 @@
     *   [ ] Start from exclusive
     *   [ ] Support stop/terminate
     *   [ ] Multiple sessions
-*   [ ] Invalidate ticket on change
+*   [x] Invalidate ticket on change
 
 ### UI
 
