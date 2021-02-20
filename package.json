@@ -2,7 +2,7 @@
 	"name": "commit-test",
 	"displayName": "commit-test",
 	"description": "Jenkins-based commit-test",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"publisher": "zigman",
 	"homepage": "http://172.26.6.129/jy.hsu/vscode-commit-test/blob/master/README.md",
 	"icon": "images/cmgk.png",
@@ -63,7 +63,7 @@
 			"scm/resourceGroup/context": [
 				{
 					"command": "commit-test.commitTestChangelist",
-					"when": "config.svn.enabled && scmProvider == svn",
+					"when": "config.svn.enabled && scmProvider == svn && scmResourceGroup != unversioned",
 					"group": "inline"
 				},
 				{
