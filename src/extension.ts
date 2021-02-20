@@ -10,8 +10,8 @@ export function activate(context: vscode.ExtensionContext) {
         'commit-test.commitTest', modem.commitTest));
     context.subscriptions.push(vscode.commands.registerCommand(
         'commit-test.commitTestChangelist', modem.commitTestChangelist));
-        context.subscriptions.push(vscode.commands.registerCommand(
-            'commit-test.getTicketChangelist', modem.getTicketChangelist));
+    context.subscriptions.push(vscode.commands.registerCommand(
+        'commit-test.getTicketChangelist', modem.getTicketChangelist));
 }
 
 // this method is called when your extension is deactivated
