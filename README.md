@@ -30,7 +30,7 @@ to the legacy [celeryd service](amqp://cmgk@172.26.6.130).
 
 ```json
 {
-    "commi-test": {
+    "commit-test": {
         "jenkins": {
             "account": {
                 // Valid account which can login to the Jenkins service (usually your NT account), mandatory
