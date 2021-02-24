@@ -63,7 +63,7 @@
 			"scm/resourceGroup/context": [
 				{
 					"command": "commit-test.commitTestChangelist",
-					"when": "config.svn.enabled && scmProvider == svn && scmResourceGroup != unversioned",
+					"when": "config.svn.enabled && scmProvider == svn && scmResourceGroup =~ /^(changes|changelist-.*)/",
 					"group": "inline"
 				},
 				{
