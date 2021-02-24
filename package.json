@@ -5,7 +5,7 @@
 	"version": "0.0.3",
 	"publisher": "zigman",
 	"homepage": "http://172.26.6.129/jy.hsu/vscode-commit-test/blob/master/README.md",
-	"icon": "images/cmgk.png",
+	"icon": "images/commit-test.png",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/zigman-dev/vscode-commit-test.git"
