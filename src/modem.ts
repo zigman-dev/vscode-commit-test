@@ -4,12 +4,10 @@
 import { URL } from 'url';
 import vscode from 'vscode';
 
-let util = require('util');
-
 // project
-import svn from "./svn"
-import workspace from "./workspace"
-import { submitBuild, BuildError } from "./jenkins"
+import * as workspace from './workspace'
+import { submitBuild, BuildError } from './jenkins'
+import * as scm from './scm'
 
 //------------------------------------------------------------------------------
 //  types
@@ -95,10 +93,7 @@ let tickets = new Tickets;
 //------------------------------------------------------------------------------
 //  interface
 //------------------------------------------------------------------------------
-export default { commitTest, commitTestChangelist, getTicketChangelist }
-
-//------------------------------------------------------------------------------
-async function getTicketChangelist(
+export async function getTicketChangelist(
     resourceGroup: vscode.SourceControlResourceGroup
 ) {
     // FIXME:
@@ -130,13 +125,11 @@ async function getTicketChangelist(
 
 
 //------------------------------------------------------------------------------
-async function commitTestChangelist(
+export async function commitTestChangelist(
     resourceGroup: vscode.SourceControlResourceGroup
 ) {
     if (!resourceGroup)
         return;
-
-    console.log(resourceGroup);
 
     if (resourceGroup.resourceStates.length == 0) {
         vscode.window.showWarningMessage("Empty changelist");
@@ -158,11 +151,13 @@ async function commitTestChangelist(
         vscode.window.showErrorMessage("Invalid folder");
         return;
     }
-    let cwd = process.cwd()
-    process.chdir(folder.uri.fsPath);
-    let diff = await svn.get_patch(".", changelist);
-    process.chdir(cwd);
-    console.log(diff);
+    let modemWorkspace = await scm.getScmWorkspace(folder);
+    if (modemWorkspace.type != scm.Type.Svn) {
+        vscode.window.showErrorMessage("Expect a svn workspace");
+        return;
+    }
+
+    let patch = await modemWorkspace.getPatch(changelist);
 
     //---------------------
     //  submit to Jenkins
@@ -171,7 +166,7 @@ async function commitTestChangelist(
         "commit-test.jenkins",
         folder
     );
-    let job = config.get<string>("jobName");
+    let job = config.get<string>("commit-test.jobName");
     if (!job) {
         vscode.window.showErrorMessage("Invalid jobName");
         return;
@@ -179,7 +174,7 @@ async function commitTestChangelist(
     let mail = config.get<string>("account.mail");
 
     let parameters: any = {
-        patch: Buffer.from(diff)
+        patch: Buffer.from(patch)
     }
     if (mail)
         parameters.mail = mail;
@@ -209,70 +204,45 @@ async function commitTestChangelist(
 }
 
 //------------------------------------------------------------------------------
-async function commitTest() {
+export async function commitTest() {
 
     //------------------------
-    //  select svn workspace
+    //        modem 
     //------------------------
-    let folder = await workspace.selectFolder(true);
-
-    if (folder == null) {
+    let modemWorkspace = await workspace.selectFolder(workspace.Type.Svn);
+    if (modemWorkspace == null) {
         vscode.window.showWarningMessage("No svn workspace folder selected");
         return;
     }
-    console.log(`folder: ${folder.name}`);
-
-    //---------------------
-    //  select changelist
-    //---------------------
-    let changelists = await svn.get_changelists(folder.uri.fsPath);
-    let changelist: string | null = null;
-    if (changelists.length > 0) {
-        let pick = await vscode.window.showQuickPick(
-            changelists.concat('<default>'),
-            { placeHolder: "Pick a changelist" }
-        );
-        if (!pick)
-            return;
-        changelist = pick == '<default>' ? null : pick;
-    }
-
-    console.log(`changelist: ${changelist}`);
-
-    //---------------------
-    //   generate patch
-    //---------------------
-    let cwd = process.cwd()
-    process.chdir(folder.uri.fsPath);
-    let diff = await svn.get_patch(".", changelist);
-    process.chdir(cwd);
-    console.log(diff);
+    console.log(modemWorkspace);
+    let changelist = await workspace.selectChangelist(modemWorkspace);
+    let patch = await modemWorkspace.getPatch(changelist);
 
     //---------------------
     //  submit to Jenkins
     //---------------------
     let config = vscode.workspace.getConfiguration(
         "commit-test.jenkins",
-        folder
+        modemWorkspace.folder
     );
-    let job = config.get<string>("jobName");
+    let job = config.get<string>("commit-test.jobName");
     if (!job) {
         vscode.window.showErrorMessage("Invalid jobName");
         return;
     }
     let mail = config.get<string>("account.mail");
     let parameters: any = {
-        patch: Buffer.from(diff)
+        patch: Buffer.from(patch)
     }
     if (mail)
         parameters.mail = mail;
 
     try {
-        let result = await submitBuild(folder, job, parameters, 'ticket');
+        let result = await submitBuild(modemWorkspace.folder, job, parameters, 'ticket');
         console.log(result);
         if (result.artifact) {
             tickets.save(
-                folder,
+                modemWorkspace.folder,
                 changelist ? `changelist-${changelist}` : "changes",
                 result.artifact,
                 [] // FIXME: Supply valid file list

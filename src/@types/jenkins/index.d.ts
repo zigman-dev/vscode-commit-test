@@ -5,6 +5,13 @@
 
 /// <reference types="node" />
 
+declare module 'svn-interface' {
+    import cp from 'child_process';
+    function info (files: string | string[], options: object, cb: (err: Error, data: any) => void): cp.ChildProcess;
+    function status (files: string | string[], options: object, cb: (err: Error, data: any) => void): cp.ChildProcess;
+    function _execSVN (command: string, files: string | string[], options: object, cb: (err: Error, data: any) => void): cp.ChildProcess;
+}
+
 declare module 'jenkins' {
     namespace create {
         interface JenkinsAPI {

@@ -20,7 +20,8 @@
 		"onCommand:commit-test.verifyEnvironment",
 		"onCommand:commit-test.commitTest",
 		"onCommand:commit-test.commitTestChangelist",
-		"onCommand:commit-test.getTicketChangelist"
+		"onCommand:commit-test.getTicketChangelist",
+		"onCommand:commit-test.preCommitTest"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -47,6 +48,11 @@
 				"title": "Get Ticket for Changlist",
 				"category": "Commit-Test",
 				"icon": "$(bookmark)"
+			},
+			{
+				"command": "commit-test.preCommitTest",
+				"title": "Submit Pre-Commit-Test for Cooper",
+				"category": "Commit-Test"
 			}
 		],
 		"menus": {
@@ -94,15 +100,41 @@
 					"scope": "resource",
 					"default": "http://172.26.6.130:8080"
 				},
-				"commit-test.jenkins.jobName": {
+				"commit-test.jenkins.commit-test.jobName": {
 					"type": "string",
 					"scope": "resource",
 					"default": "mainline/commit_test"
+				},
+				"commit-test.jenkins.pre-commit.jobName": {
+					"type": "string",
+					"scope": "resource",
+					"default": "cooper/pre-commit"
+				},
+				"commit-test.jenkins.pre-commit.parameters.modem_config": {
+					"type": "string",
+					"scope": "resource",
+					"default": ""
+				},
+				"commit-test.jenkins.pre-commit.parameters.modem_cppflags": {
+					"type": "string",
+					"scope": "resource",
+					"default": ""
+				},
+				"commit-test.jenkins.pre-commit.parameters.ap_config": {
+					"type": "string",
+					"scope": "resource",
+					"default": ""
+				},
+				"commit-test.jenkins.pre-commit.parameters.ap_cppflags": {
+					"type": "string",
+					"scope": "resource",
+					"default": ""
 				}
 			},
 			"default": {
 				"commit-test.jenkins.hostAddress": "http://172.26.6.130:8080",
-				"commit-test.jenkins.jobName": "mainline/commit_test"
+				"commit-test.jenkins.commit-test.jobName": "mainline/commit_test",
+				"commit-test.jenkins.pre-commit.jobName": "cooper/pre-commit"
 			}
 		}
 	},

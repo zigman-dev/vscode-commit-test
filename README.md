@@ -44,7 +44,18 @@ to the legacy [celeryd service](amqp://cmgk@172.26.6.130).
             // Jenkins host and job to submit test to, optional and default to the following value.
             // Use default (just leave them undefined) unless you know what you are doing.
             "hostAddress": "http://172.26.6.130:8080",
-            "jobName": "mainline/commit_test"
+            "commit-test": {
+                "jobName": "mainline/commit_test"
+            },
+            "pre-commit": {
+                "jobName": "cooper/pre-commit",
+                "parameters": {
+                    "modem_config": "",
+                    "modem_cppflags": "",
+                    "ap_config": "",
+                    "ap_cppflags": ""
+                }
+            }
         }
     }
 }

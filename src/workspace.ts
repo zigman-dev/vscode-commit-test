@@ -1,8 +1,14 @@
 //------------------------------------------------------------------------------
 //  dependencies
 //------------------------------------------------------------------------------
-import * as vscode from 'vscode';
-import svn from './svn';
+import vscode from 'vscode';
+import * as scm from './scm'
+
+export { Type } from './scm';
+
+//------------------------------------------------------------------------------
+//  types
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //  functions
@@ -11,41 +17,51 @@ import svn from './svn';
 //------------------------------------------------------------------------------
 //  interface
 //------------------------------------------------------------------------------
-export default { selectFolder };
-
-//------------------------------------------------------------------------------
-async function selectFolder(
-    requireSvnWorkspace: boolean = false
-): Promise<vscode.WorkspaceFolder | null> {
+export async function selectFolder(
+    scmType: scm.Type | null = null
+): Promise<scm.Scm | null> {
 
     // FIXME: Rewrite with filter/map
-    let folders: vscode.WorkspaceFolder[] = [];
+    let scmWorkspaces: scm.Scm[] = [];
     for (let folder of vscode.workspace.workspaceFolders || []) {
-        let result = !requireSvnWorkspace || await svn.is_workspace(folder.uri.fsPath);
-        console.log(folder.name, ":", result);
-        if (result)
-            folders.push(folder);
+        let scmWorkspace = await scm.getScmWorkspace(folder);
+        if (scmType == null || scmWorkspace.type == scmType)
+            scmWorkspaces.push(scmWorkspace);
     }
 
-    if (folders.length == 0)
+    if (scmWorkspaces.length == 0)
         return null;
 
-    let folder = folders[0];
-    if (folders.length > 1) {
+    let scmWorkspace = scmWorkspaces[0];
+    if (scmWorkspaces.length > 1) {
         let pick = await vscode.window.showQuickPick(
-            folders.map(folder => {
+            scmWorkspaces.map(wc => {
                 return {
-                    label: folder.name,
-                    folder: folder
+                    label: wc.folder.name,
+                    scmWorkspace: wc
                 }
             }),
             { placeHolder: "Pick a folder" }
         );
         if (!pick)
             return null
-        folder = pick.folder
+        scmWorkspace = pick.scmWorkspace;
     }
 
-    console.log(`folder: ${folder.name}`);
-    return folder;
+    return scmWorkspace;
+}
+
+//------------------------------------------------------------------------------
+export async function selectChangelist(scmWorkspace: scm.Scm): Promise<string | null> {
+    let changelists = await scmWorkspace.getChangelists();
+    let changelist: string | null = null;
+    if (changelists.length > 0) {
+        let pick = await vscode.window.showQuickPick(
+            changelists.concat('<default>'),
+            { placeHolder: "Pick a changelist" }
+        );
+        if (pick)
+            changelist = pick == '<default>' ? null : pick;
+    }
+    return changelist;
 }

@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 let jenkins = require('jenkins')
 
 // project
-import workspace from './workspace'
+import * as workspace from './workspace'
 
 //------------------------------------------------------------------------------
 //  interface
@@ -17,10 +17,15 @@ export default async function verifyEnvironment() {
 
     // Get user acount if supplied
     // FIXME: Handle multi-folder workspace
-    let folder = await workspace.selectFolder(false);
+    let folder = await workspace.selectFolder();
+    if (folder == null) {
+        vscode.window.showWarningMessage("No workspace folder selected");
+        return;
+    }
+
     let config = vscode.workspace.getConfiguration(
         "commit-test.jenkins",
-        folder
+        folder.folder
     );
     let user = config.get<string>("account.user");
     let password = config.get<string>("account.password");
@@ -42,6 +47,7 @@ export default async function verifyEnvironment() {
     url.password = password;
 
     try {
+        // FIXME: Move these to jenkins.ts
         let jenkinsInstance = jenkins({
             baseUrl: url.href,
             crumbIssuer: true,
