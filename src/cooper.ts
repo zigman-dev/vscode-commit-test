@@ -70,13 +70,25 @@ export async function preCommitTest() {
         return;
     }
     let mail = config.get<string>("account.mail");
-    let parameters: any = config.get<object>("pre-commit.parameters");
+    config = vscode.workspace.getConfiguration(
+        "commit-test.jenkins.pre-commit.parameters",
+        configWorkspace.folder
+    );
+    let parameters: any = {
+        modem_config: config.get<string>("modem_config"),
+        modem_cppflags: config.get<string>("modem_cppflags"),
+        ap_config: config.get<string>("ap_config"),
+        ap_cppflags: config.get<string>("ap_cppflags"),
+
+    }
     if (patches.modem)
         parameters.modem_patch = Buffer.from(patches.modem);
     if (patches.ap)
         parameters.ap_patch = Buffer.from(patches.ap);
     if (mail)
         parameters.mail = mail;
+
+    console.log(parameters);
 
     try {
         let result = await submitBuild(configWorkspace.folder, job, parameters, 'ticket');
