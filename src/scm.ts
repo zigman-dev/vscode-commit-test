@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------------
 import vscode from 'vscode';
 import svn from 'svn-interface';
+import simpleGit, { SimpleGit } from 'simple-git';
 import { getVSCodeDownloadUrl } from 'vscode-test/out/util';
 
 let cp = require('child_process');
@@ -73,7 +74,6 @@ class Svn implements Scm {
 
     //--------------------------------------------------------------------------
     async getChangelists(): Promise<string[]> {
-        console.log('Svn.getChangelist()')
         let changelists = await new Promise<string[]>((resolve, reject) => {
             svn.status(
                 this.folder.uri.fsPath,
@@ -87,7 +87,8 @@ class Svn implements Scm {
                     ))
                 }
             )
-        })
+        });
+        changelists.push("<default>");
         console.log(changelists)
         return changelists;
     }
@@ -99,7 +100,7 @@ class Svn implements Scm {
         let options: Record<string, string | true> = {
             "patch-compatible": true
         };
-        if (changelist != null)
+        if (changelist != "<default>" && changelist != null)
             options["changelist"] = changelist;
         let patch = await new Promise<string>((resolve, reject) => {
             svn._execSVN(
@@ -117,8 +118,44 @@ class Svn implements Scm {
 };
 
 //------------------------------------------------------------------------------
-// FIXME: Implement Git
+//------------------------------------------------------------------------------
+class Git implements Scm {
+    type: Type = Type.Git;
+    folder: vscode.WorkspaceFolder;
+    private git: SimpleGit;
 
+    //--------------------------------------------------------------------------
+    static async isWorkspace(path: string): Promise<boolean> {
+        let git = simpleGit(path);
+        let result = false;
+        try {
+            await git.status();
+            result = true;
+        } catch (error) {
+            console.log(error);
+        }
+        return result;
+    }
+
+    //--------------------------------------------------------------------------
+    constructor(folder: vscode.WorkspaceFolder) {
+        this.folder = folder;
+        this.git = simpleGit(folder.uri.fsPath);
+    }
+
+    //--------------------------------------------------------------------------
+    async getChangelists(): Promise<string[]> {
+        return ['<staged>', '<unstaged>'];
+    }
+
+    //--------------------------------------------------------------------------
+    async getPatch(changelist: string | null): Promise<string> {
+        let options = [];
+        if (changelist == "<staged>")
+            options.push("--cached");
+        return await this.git.diff(options);
+    }
+};
 
 //------------------------------------------------------------------------------
 //  interface
@@ -127,5 +164,7 @@ export async function getScmWorkspace(folder: vscode.WorkspaceFolder): Promise<S
 
     if (await Svn.isWorkspace(folder.uri.fsPath))
         return new Svn(folder);
+    else if (await Git.isWorkspace(folder.uri.fsPath))
+        return new Git(folder);
     return new None(folder);
 }

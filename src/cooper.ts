@@ -44,9 +44,13 @@ export async function preCommitTest() {
     //---------------------
     //         ap
     //---------------------
-
-    // FIXME: git scm support is TBD
     let apWorkspace = await workspace.selectFolder(workspace.Type.Git);
+    if (apWorkspace != null) {
+        let changelist = await workspace.selectChangelist(apWorkspace);
+        patches.ap = await apWorkspace.getPatch(changelist);
+    } else {
+        vscode.window.showInformationMessage("No git workspace folder selected");
+    }
     console.log(patches);
 
     let configWorkspace = apWorkspace ? apWorkspace : modemWorkspace; // AP as main

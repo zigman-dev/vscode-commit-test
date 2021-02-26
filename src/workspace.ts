@@ -57,11 +57,11 @@ export async function selectChangelist(scmWorkspace: scm.Scm): Promise<string | 
     let changelist: string | null = null;
     if (changelists.length > 0) {
         let pick = await vscode.window.showQuickPick(
-            changelists.concat('<default>'),
+            changelists,
             { placeHolder: "Pick a changelist" }
         );
         if (pick)
-            changelist = pick == '<default>' ? null : pick;
+            changelist = pick;
     }
     return changelist;
 }

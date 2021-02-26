@@ -162,6 +162,7 @@
 	"dependencies": {
 		"form-data": "^3.0.0",
 		"jenkins": "^0.28.1",
+		"simple-git": "^2.35.2",
 		"svn-interface": "^0.5.0"
 	}
 }
