@@ -60,7 +60,7 @@ export async function preCommitTest() {
         "commit-test.jenkins",
         configWorkspace.folder
     );
-    let job = config.get<string>("jobName");
+    let job = config.get<string>("pre-commit.jobName");
     if (!job) {
         vscode.window.showErrorMessage("Invalid jobName");
         return;
