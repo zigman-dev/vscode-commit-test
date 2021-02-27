@@ -7,10 +7,13 @@
     *   [x] In modem mainline documentation
 *   [ ] Logging
 *   [x] Username/password
+*   [ ] Fold `contributes.configuration` in `package.json`
 
 ## Functionalities
 
-*   [ ] Support pre-commit
+*   [x] Pre-commit
+    *   [x] Parameters configuration
+*   [ ] Commit
 
 ### Machanism
 
@@ -22,7 +25,9 @@
     *   [ ] Start from exclusive
     *   [ ] Support stop/terminate
     *   [ ] Multiple sessions
-*   [x] Invalidate ticket on change
+*   Invalidate ticket
+    *   [x] On file change
+    *   [ ] On changelist change
 
 ### UI
 
@@ -33,3 +38,4 @@
 *   [ ] Display build activeness
 *   [x] Provide command access via scm panel
 *   [x] Indicate ticket availability
+*   [ ] Colorize build logging
