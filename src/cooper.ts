@@ -79,7 +79,7 @@ export async function preCommitTest() {
         modem_cppflags: config.get<string>("modem_cppflags"),
         ap_config: config.get<string>("ap_config"),
         ap_cppflags: config.get<string>("ap_cppflags"),
-
+        testcase: config.get<string>("testcase")
     }
     if (patches.modem)
         parameters.modem_patch = Buffer.from(patches.modem);

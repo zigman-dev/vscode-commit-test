@@ -138,6 +138,12 @@
 					"scope": "resource",
 					"default": "",
 					"description": "Extra CPPFLAGS to use while building AP."
+				},
+				"commit-test.jenkins.pre-commit.parameters.testcase": {
+					"type": "string",
+					"enum": ["ping", "ping_after_idle", "Eclipse_Leshan", "ping_100_times", "long_idle"],
+					"default": "ping",
+					"description": "Test case to perform"
 				}
 			}
 		}
