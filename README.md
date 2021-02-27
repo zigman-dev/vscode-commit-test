@@ -35,24 +35,32 @@ to the legacy [celeryd service](amqp://cmgk@172.26.6.130).
             "account": {
                 // Valid account which can login to the Jenkins service (usually your NT account), mandatory
                 "user": "your.name",
+                // Password for the valid account
                 "password": "password",
 
                 // Mail address to send notification to, optional
                 "mail": "your.mail@realtek.com",
             },
 
-            // Jenkins host and job to submit test to, optional and default to the following value.
-            // Use default (just leave them undefined) unless you know what you are doing.
+            // Jenkins host to submit test to, just use default
             "hostAddress": "http://172.26.6.130:8080",
+
             "commit-test": {
+                // Jenkins job to submit commit-test to, just use default
                 "jobName": "mainline/commit_test"
             },
             "pre-commit": {
+                // Jenkins job to submit pre-commit to, just use default
                 "jobName": "cooper/pre-commit",
+                // Parameters for pre-commit. Normally these will be tweaked for individual test.
                 "parameters": {
+                    // Extra variables to use while configuring modem. Do not define CPPFLAGS variable here, please use modem_cppflags for macro defining.
                     "modem_config": "",
+                    // Extra CPPFLAGS to use while building modem.
                     "modem_cppflags": "",
+                    // Extra variables to use while building AP. Do not define CPPFLAGS variable here, please use ap_cppflags for macro defining.
                     "ap_config": "",
+                    // Extra CPPFLAGS to use while building AP
                     "ap_cppflags": ""
                 }
             }

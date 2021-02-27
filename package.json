@@ -84,57 +84,61 @@
 			"properties": {
 				"commit-test.jenkins.account.user": {
 					"type": "string",
-					"scope": "resource"
+					"scope": "resource",
+					"description": "Valid account which can login to the Jenkins service (usually your NT account), mandatory"
 				},
 				"commit-test.jenkins.account.password": {
 					"type": "string",
-					"scope": "resource"
+					"scope": "resource",
+					"description": "Password for the valid account"
 				},
 				"commit-test.jenkins.account.mail": {
 					"type": "string",
-					"scope": "resource"
+					"scope": "resource",
+					"description": "Mail address to send notification to, optional"
 				},
 				"commit-test.jenkins.hostAddress": {
 					"type": "string",
 					"format": "uri",
 					"scope": "resource",
-					"default": "http://172.26.6.130:8080"
+					"default": "http://172.26.6.130:8080",
+					"description": "Jenkins host to submit test to"
 				},
 				"commit-test.jenkins.commit-test.jobName": {
 					"type": "string",
 					"scope": "resource",
-					"default": "mainline/commit_test"
+					"default": "mainline/commit_test",
+					"description": "Jenkins job to submit commit-test to"
 				},
 				"commit-test.jenkins.pre-commit.jobName": {
 					"type": "string",
 					"scope": "resource",
-					"default": "cooper/pre-commit"
+					"default": "cooper/pre-commit",
+					"description": "Jenkins job to submit pre-commit to"
 				},
 				"commit-test.jenkins.pre-commit.parameters.modem_config": {
 					"type": "string",
 					"scope": "resource",
-					"default": ""
+					"default": "",
+					"markdownDescription": "Extra variables to use while configuring modem. Do not define `CPPFLAGS` variable here, please use `#commit-test.jenkins.pre-commit.modem_cppflags#` for macro defining."
 				},
 				"commit-test.jenkins.pre-commit.parameters.modem_cppflags": {
 					"type": "string",
 					"scope": "resource",
-					"default": ""
+					"default": "",
+					"description": "Extra CPPFLAGS to use while building modem."
 				},
 				"commit-test.jenkins.pre-commit.parameters.ap_config": {
 					"type": "string",
 					"scope": "resource",
-					"default": ""
+					"markdownDescription": "Extra variables to use while building AP. Do not define `CPPFLAGS` variable here, please use `#commit-test.jenkins.pre-commit.ap_cppflags#` for macro defining."
 				},
 				"commit-test.jenkins.pre-commit.parameters.ap_cppflags": {
 					"type": "string",
 					"scope": "resource",
-					"default": ""
+					"default": "",
+					"description": "Extra CPPFLAGS to use while building AP."
 				}
-			},
-			"default": {
-				"commit-test.jenkins.hostAddress": "http://172.26.6.130:8080",
-				"commit-test.jenkins.commit-test.jobName": "mainline/commit_test",
-				"commit-test.jenkins.pre-commit.jobName": "cooper/pre-commit"
 			}
 		}
 	},
