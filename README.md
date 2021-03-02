@@ -10,6 +10,10 @@ to the legacy [celeryd service](amqp://cmgk@172.26.6.130).
 > future. Please switch to the Jenkins service even you are not going to use
 > this extension.
 
+Pre-commit test for Cooper is also supported (experimentally).
+
+> We plan to add more Jenkins jobs will in the future.
+
 ## Features
 
 *   Support `svn` changelist
@@ -62,7 +66,9 @@ to the legacy [celeryd service](amqp://cmgk@172.26.6.130).
                     "ap_config": "",
                     // Extra CPPFLAGS to use while building AP
                     "ap_cppflags": ""
-                }
+                },
+                // Test case to perform. Supported cases are: "ping", "ping_after_idle", "Eclipse_Leshan", "ping_100_times", "long_idle"
+                "testcase": "ping"
             }
         }
     }
@@ -132,6 +138,17 @@ displayed with notification.
 This is an alternative way to submit commit-test. The difference is in that
 `svn` folder and changelist to submit commit-test for are selected with quick
 pick (if selection is necessary).
+
+### `Submit Pre-Commit-Test for Cooper`
+
+Not directly related to `cmgk`, but should be handy for people who utilizes
+`cooper/pre-commit` to perform automated test on Cooper board.
+
+Launching test should be straightforward. Remember to specify build
+configurations and test case via settings:
+
+*   `commit-test.jenkins.pre-commit.parameters`
+*   `commit-test.jenkins.pre-commit.testcase`
 
 ## `svn` changelist support
 
