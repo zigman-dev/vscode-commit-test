@@ -24,3 +24,13 @@
     *   "Submit Commit for Changelist"
     *   "Get Ticket for Changelist"
         *   Accessible while ticket is available
+
+## [0.0.3] - 2021-03-02
+
+### Added
+
+*   Command "Submit Pre-Commit-Test for Cooper"
+
+### Features
+
+*   Update icons
