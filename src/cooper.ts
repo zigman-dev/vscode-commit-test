@@ -75,8 +75,10 @@ export async function preCommitTest() {
         configWorkspace.folder
     );
     let parameters: any = {
+        modem_revision: config.get<string>("modem_revision"),
         modem_config: config.get<string>("modem_config"),
         modem_cppflags: config.get<string>("modem_cppflags"),
+        ap_revision: config.get<string>("ap_revision"),
         ap_config: config.get<string>("ap_config"),
         ap_cppflags: config.get<string>("ap_cppflags"),
         testcase: config.get<string>("testcase")

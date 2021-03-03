@@ -116,6 +116,12 @@
 					"default": "cooper/pre-commit",
 					"description": "Jenkins job to submit pre-commit to"
 				},
+				"commit-test.jenkins.pre-commit.parameters.modem_revision": {
+					"type": "string",
+					"scope": "resource",
+					"default": "HEAD",
+					"markdownDescription": ""
+				},
 				"commit-test.jenkins.pre-commit.parameters.modem_config": {
 					"type": "string",
 					"scope": "resource",
@@ -127,6 +133,12 @@
 					"scope": "resource",
 					"default": "",
 					"description": "Extra CPPFLAGS to use while building modem."
+				},
+				"commit-test.jenkins.pre-commit.parameters.ap_revision": {
+					"type": "string",
+					"scope": "resource",
+					"default": "master",
+					"markdownDescription": ""
 				},
 				"commit-test.jenkins.pre-commit.parameters.ap_config": {
 					"type": "string",

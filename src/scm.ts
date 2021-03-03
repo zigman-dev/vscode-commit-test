@@ -79,12 +79,17 @@ class Svn implements Scm {
                 this.folder.uri.fsPath,
                 {},
                 (error: Error, result: any) => {
-                    let cls = Array.isArray(result.status.changelist) ?
-                        result.status.changelist : [result.status.changelist];
+                    let cls: string[] = [];
+                    if (result.status.changelist) {
+                        if (Array.isArray(result.status.changelist))
+                            cls.concat(result.status.changelist.map(
+                                (changelist: any) => changelist._attribute.name
+                            ));
+                        else
+                            cls.push(result.status.changelist._attribute.name);
+                    }
                     console.log(cls);
-                    resolve(cls.map(
-                        (changelist: any) => changelist._attribute.name
-                    ))
+                    resolve(cls);
                 }
             )
         });
