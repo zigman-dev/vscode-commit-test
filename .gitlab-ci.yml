@@ -1,0 +1,17 @@
+stages:
+- release
+
+release:
+  image: node:latest
+  cache:
+    paths:
+      - node_modules/
+  before_script:
+    - npm install --global vsce
+  build:
+    script:
+      - npm install
+      - vsce package
+  artifacts:
+    paths:
+      - "*.vsix"
