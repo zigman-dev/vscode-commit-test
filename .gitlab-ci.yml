@@ -2,6 +2,7 @@ stages:
 - release
 
 release:
+  stage: release
   image: node:latest
   cache:
     paths:
