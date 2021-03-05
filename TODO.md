@@ -7,12 +7,15 @@
     *   [x] In modem mainline documentation
 *   [ ] Logging
 *   [x] Username/password
-*   [ ] Fold `contributes.configuration` in `package.json`
+*   [ ] ~~Fold `contributes.configuration` in `package.json`~~
+    *   Not supported
 
 ## Functionalities
 
 *   [x] Pre-commit
     *   [x] Parameters configuration
+    *   [ ] Revision selection
+        *   Integrate with vscode scm
 *   [ ] Commit
 
 ### Machanism
@@ -27,7 +30,8 @@
     *   [ ] Multiple sessions
 *   Invalidate ticket
     *   [x] On file change
-    *   [ ] On changelist change
+    *   [x] On changelist change
+*   `commit_test` for branches
 
 ### UI
 
