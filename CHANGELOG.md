@@ -4,9 +4,9 @@
 
 ## [0.0.5] - 2021-03-06
 
-### Fixed
+### Added
 
-*   TBD
+*   Automatic release with `.gitlab-ci.yml`
 
 ## [0.0.4] - 2021-03-05
 
