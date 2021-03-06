@@ -38,5 +38,6 @@ release:
     - if: $CI_COMMIT_TAG
   script:
     - |
-      release-cli create --name "${CI_COMMIT_TAG}" --description "TBD" --tag-name "${CI_COMMIT_TAG}" \
+      DESC=$(awk "/^## \[${V}\]/{f=1;print;next}/^## \[/{f=0}f" CHANGELOG.md) \
+      release-cli create --name "${CI_COMMIT_TAG}" --description "${DESC}" --tag-name "${CI_COMMIT_TAG}" \
         --assets-link "{\"name\":\"${BINARY}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${BINARY}\"}"
