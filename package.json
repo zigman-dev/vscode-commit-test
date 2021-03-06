@@ -2,7 +2,7 @@
 	"name": "commit-test",
 	"displayName": "commit-test",
 	"description": "Jenkins-based commit-test",
-	"version": "0.0.4",
+	"version": "0.0.5",
 	"publisher": "zigman",
 	"homepage": "http://172.26.6.129/jy.hsu/vscode-commit-test/blob/master/README.md",
 	"icon": "images/commit-test.png",
