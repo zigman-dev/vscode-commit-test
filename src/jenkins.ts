@@ -66,8 +66,8 @@ export async function submitBuild(
         return Promise.reject(new BuildError("Missing username/password"));
 
     let url = new URL(host);
-    url.username = user;
-    url.password = password;
+    url.username = encodeURIComponent(user);
+    url.password = encodeURIComponent(password);
 
     try {
         let jenkinsInstance = jenkins({
@@ -147,8 +147,8 @@ export async function submitBuild(
                     });
                     if (artifacts.length > 0) {
                         let artifactUrl = new URL(build.url);
-                        artifactUrl.username = user;
-                        artifactUrl.password = password;
+                        artifactUrl.username = encodeURIComponent(user);
+                        artifactUrl.password = encodeURIComponent(password);
                         artifactUrl.pathname += `artifact/${artifact}/*view*/`
                         buildResult.artifact = await http.download(artifactUrl);
                     }

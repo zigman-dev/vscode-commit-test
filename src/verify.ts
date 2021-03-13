@@ -43,8 +43,8 @@ export default async function verifyEnvironment() {
     }
 
     let url = new URL(host);
-    url.username = user;
-    url.password = password;
+    url.username = encodeURIComponent(user);
+    url.password = encodeURIComponent(password);
 
     try {
         // FIXME: Move these to jenkins.ts
