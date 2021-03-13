@@ -30,7 +30,7 @@ export default async function verifyEnvironment() {
     let user = config.get<string>("account.user");
     let password = config.get<string>("account.password");
     let host = config.get<string>("hostAddress");
-    let job = config.get<string>("jobName");
+    let job = config.get<string>("commit-test.jobName");
 
     if (!host) {
         vscode.window.showErrorMessage('Missing host URL');
@@ -54,7 +54,7 @@ export default async function verifyEnvironment() {
             formData: require('form-data'),
             promisify: true
         })
-        let response = await jenkinsInstance.job.get('mainline/commit_test')
+        let response = await jenkinsInstance.job.get(job)
         console.log(response)
         vscode.window.showInformationMessage('OK, we are good to go');
     } catch (error) {
