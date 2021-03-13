@@ -166,11 +166,13 @@ export async function commitTestChangelist(
         "commit-test.jenkins",
         folder
     );
+    let relativeURL = await modemWorkspace.getBranch();
     let job = config.get<string>("commit-test.jobName");
     if (!job) {
         vscode.window.showErrorMessage("Invalid jobName");
         return;
     }
+    job += "/" + encodeURIComponent(relativeURL.replace(/^\^\//, ""));
     let mail = config.get<string>("account.mail");
 
     let parameters: any = {

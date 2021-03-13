@@ -25,6 +25,7 @@ export interface Scm {
     folder: vscode.WorkspaceFolder;
     getPatch(changelist: string | null): Promise<string>;
     getChangelists(): Promise<string[]>;
+    getBranch(): Promise<string>;
 }
 
 //------------------------------------------------------------------------------
@@ -44,6 +45,11 @@ class None implements Scm {
 
     //--------------------------------------------------------------------------
     async getChangelists(): Promise<string[]> {
+        return Promise.reject(Error("Invalid SCM"));
+    }
+
+    //--------------------------------------------------------------------------
+    async getBranch(): Promise<string> {
         return Promise.reject(Error("Invalid SCM"));
     }
 };
@@ -120,6 +126,22 @@ class Svn implements Scm {
         process.chdir(cwd);
         return patch;
     }
+
+
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    async getBranch(): Promise<string> {
+        let result = await new Promise<string>((resolve, reject) => {
+            svn.info(
+                this.folder.uri.fsPath,
+                {},
+                (error: Error, result: any) => {
+                    resolve(result.info.entry['relative-url']._text);
+                }
+            )
+        });
+        return result;
+    }
 };
 
 //------------------------------------------------------------------------------
@@ -159,6 +181,11 @@ class Git implements Scm {
         if (changelist == "<staged>")
             options.push("--cached");
         return await this.git.diff(options);
+    }
+
+    //--------------------------------------------------------------------------
+    async getBranch(): Promise<string> {
+        return Promise.reject(Error("Not implemented yet"));
     }
 };
 

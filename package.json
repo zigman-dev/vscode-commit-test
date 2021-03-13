@@ -107,7 +107,7 @@
 				"commit-test.jenkins.commit-test.jobName": {
 					"type": "string",
 					"scope": "resource",
-					"default": "mainline/commit_test",
+					"default": "mainline/commit-test",
 					"description": "Jenkins job to submit commit-test to"
 				},
 				"commit-test.jenkins.pre-commit.jobName": {
