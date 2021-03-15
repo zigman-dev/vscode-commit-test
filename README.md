@@ -51,7 +51,7 @@ Pre-commit test for Cooper is also supported (experimentally).
 
             "commit-test": {
                 // Jenkins job to submit commit-test to, just use default
-                "jobName": "mainline/commit_test"
+                "jobName": "mainline/commit-test"
             },
             "pre-commit": {
                 // Jenkins job to submit pre-commit to, just use default
