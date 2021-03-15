@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.0.6] - 2021-03-15
+
+### Added
+
+*   Support commit-test for branch
+
 ## [0.0.5] - 2021-03-06
 
 ### Added
