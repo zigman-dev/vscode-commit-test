@@ -32,6 +32,7 @@
     *   [x] On file change
     *   [x] On changelist change
 *   `commit_test` for branches
+    *   [x] Warn if the branch is not seen in the jenkins multi-branch pipeline
 
 ### UI
 
