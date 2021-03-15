@@ -18,7 +18,7 @@ type BuildResult = {
     artifact: string | null
 };
 
-export class BuildError extends Error {};
+export class BuildError extends Error { };
 
 //------------------------------------------------------------------------------
 //  variables
@@ -32,7 +32,62 @@ let executable: {
 //------------------------------------------------------------------------------
 //  interface
 //------------------------------------------------------------------------------
-// FIXME: Create a class for svn operations
+export async function getJob(
+    scope: vscode.Uri | vscode.WorkspaceFolder,
+    job: string,
+): Promise<any> {
+    //---------------------
+    //   configurations
+    //---------------------
+    let config = vscode.workspace.getConfiguration(
+        "commit-test.jenkins",
+        scope
+    );
+    let user = config.get<string>("account.user");
+    let password = config.get<string>("account.password");
+    let host = config.get<string>("hostAddress");
+
+    if (!host)
+        return Promise.reject(new BuildError("Missing host URL"));
+
+    if (!user || !password)
+        return Promise.reject(new BuildError("Missing username/password"));
+
+    let url = new URL(host);
+    url.username = encodeURIComponent(user);
+    url.password = encodeURIComponent(password);
+
+    try {
+        let jenkinsInstance = jenkins({
+            baseUrl: url.href,
+            crumbIssuer: true,
+            formData: require('form-data'),
+            promisify: true
+        })
+
+        //---------------------
+        //    submit query
+        //---------------------
+        let response = await jenkinsInstance.job.get(job)
+        console.log(response)
+
+        return Promise.resolve(response);
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+//------------------------------------------------------------------------------
+export async function getBranches(
+    scope: vscode.Uri | vscode.WorkspaceFolder,
+    job: string,
+): Promise<string[]> {
+    return (await getJob(scope, job)).jobs.map(
+        (job: any) => decodeURIComponent(job.name)
+    );
+}
+
+//------------------------------------------------------------------------------
 export async function submitBuild(
     scope: vscode.Uri | vscode.WorkspaceFolder,
     job: string,

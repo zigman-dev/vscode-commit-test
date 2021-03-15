@@ -6,7 +6,7 @@ import vscode from 'vscode';
 
 // project
 import * as workspace from './workspace'
-import { submitBuild, BuildError } from './jenkins'
+import { getBranches, submitBuild, BuildError } from './jenkins'
 import * as scm from './scm'
 
 //------------------------------------------------------------------------------
@@ -172,7 +172,28 @@ export async function commitTestChangelist(
         vscode.window.showErrorMessage("Invalid jobName");
         return;
     }
+
+    // Verify if the branch is supported
+    try {
+        let branches = await getBranches(folder, job);
+        if (!branches.includes(relativeURL.replace(/^\^\//, ""))) {
+            vscode.window.showWarningMessage(
+                `${relativeURL} is not available in ${job}.\nAvailable: (${branches.toString()})`
+            );
+        }
+    } catch (error) {
+        console.error(error);
+        if (error instanceof BuildError) {
+            vscode.window.showWarningMessage(error.message);
+        }
+        else {
+            vscode.window.showWarningMessage(
+                'Failed querying available branches'
+            );
+        }
+    }
     job += "/" + encodeURIComponent(relativeURL.replace(/^\^\//, ""));
+
     let mail = config.get<string>("account.mail");
 
     let parameters: any = {
@@ -227,12 +248,37 @@ export async function commitTest() {
         "commit-test.jenkins",
         modemWorkspace.folder
     );
+    let relativeURL = await modemWorkspace.getBranch();
     let job = config.get<string>("commit-test.jobName");
     if (!job) {
         vscode.window.showErrorMessage("Invalid jobName");
         return;
     }
+
+    // Verify if the branch is supported
+    try {
+        let branches = await getBranches(modemWorkspace.folder, job);
+        if (!branches.includes(relativeURL.replace(/^\^\//, ""))) {
+            vscode.window.showWarningMessage(
+                `${relativeURL} is not available in ${job}.\nAvailable: (${branches.toString()})`
+            );
+        }
+    } catch (error) {
+        console.error(error);
+        if (error instanceof BuildError) {
+            vscode.window.showWarningMessage(error.message);
+        }
+        else {
+            vscode.window.showWarningMessage(
+                'Failed querying available branches'
+            );
+        }
+    }
+
+    job += "/" + encodeURIComponent(relativeURL.replace(/^\^\//, ""));
+
     let mail = config.get<string>("account.mail");
+
     let parameters: any = {
         patch: Buffer.from(patch)
     }
