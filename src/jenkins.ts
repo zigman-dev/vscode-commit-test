@@ -202,8 +202,9 @@ export async function submitBuild(
                     });
                     if (artifacts.length > 0) {
                         let artifactUrl = new URL(build.url);
-                        artifactUrl.username = encodeURIComponent(user);
-                        artifactUrl.password = encodeURIComponent(password);
+                        // URI component encoding is not necessary for node.js http
+                        artifactUrl.username = user;
+                        artifactUrl.password = password;
                         artifactUrl.pathname += `artifact/${artifact}/*view*/`
                         buildResult.artifact = await http.download(artifactUrl);
                     }
