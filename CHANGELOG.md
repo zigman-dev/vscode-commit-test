@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.0.7] - 2021-04-15
+
+### Fixed
+
+*   Stop URI encoding username/password for node.js http
+
 ## [0.0.6] - 2021-03-15
 
 ### Added
