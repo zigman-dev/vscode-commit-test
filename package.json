@@ -18,9 +18,6 @@
 	],
 	"activationEvents": [
 		"onCommand:commit-test.verifyEnvironment",
-		"onCommand:commit-test.commitTest",
-		"onCommand:commit-test.commitTestChangelist",
-		"onCommand:commit-test.getTicketChangelist",
 		"onCommand:commit-test.preCommitTest"
 	],
 	"main": "./out/extension.js",
@@ -33,52 +30,11 @@
 				"category": "Commit-Test"
 			},
 			{
-				"command": "commit-test.commitTest",
-				"title": "Submit Commit-Test",
-				"category": "Commit-Test"
-			},
-			{
-				"command": "commit-test.commitTestChangelist",
-				"title": "Submit Commit-Test for Changelist",
-				"category": "Commit-Test",
-				"icon": "$(run)"
-			},
-			{
-				"command": "commit-test.getTicketChangelist",
-				"title": "Get Ticket for Changlist",
-				"category": "Commit-Test",
-				"icon": "$(bookmark)"
-			},
-			{
 				"command": "commit-test.preCommitTest",
 				"title": "Submit Pre-Commit-Test for Cooper",
 				"category": "Commit-Test"
 			}
 		],
-		"menus": {
-			"commandPalette": [
-				{
-					"command": "commit-test.commitTestChangelist",
-					"when": "false"
-				},
-				{
-					"command": "commit-test.getTicketChangelist",
-					"when": "false"
-				}
-			],
-			"scm/resourceGroup/context": [
-				{
-					"command": "commit-test.commitTestChangelist",
-					"when": "config.svn.enabled && scmProvider == svn && scmResourceGroup =~ /^(changes|changelist-.*)/",
-					"group": "inline"
-				},
-				{
-					"command": "commit-test.getTicketChangelist",
-					"when": "config.svn.enabled && scmProvider == svn && scmResourceGroup in commit-test:tickets",
-					"group": "inline"
-				}
-			]
-		},
 		"configuration": {
 			"title": "Commit-Test",
 			"properties": {
@@ -103,12 +59,6 @@
 					"scope": "resource",
 					"default": "http://172.26.6.130:8080",
 					"description": "Jenkins host to submit test to"
-				},
-				"commit-test.jenkins.commit-test.jobName": {
-					"type": "string",
-					"scope": "resource",
-					"default": "mainline/commit-test",
-					"description": "Jenkins job to submit commit-test to"
 				},
 				"commit-test.jenkins.pre-commit.jobName": {
 					"type": "string",
