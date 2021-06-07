@@ -31,57 +31,86 @@ export async function sanityTest() {
     } = { modem: null, ap: null };
 
     //---------------------
-    //       modem
+    //     workspace   
     //---------------------
-    let modemWorkspace = await workspace.selectFolder(workspace.Type.Git);
+    let folders = vscode.workspace.workspaceFolders;
+    if (!folders || folders.length == 0) {
+        vscode.window.showWarningMessage("Empty workspace");
+        return;
+    }
+    let anyFolderInWorkspace = folders[0];
+
+    let workspaceConfig = vscode.workspace.getConfiguration(
+        "commit-test.workspace",
+        anyFolderInWorkspace // Configuration should come from workspace level
+    );
+
+    // modem
+    let modemFolders = folders.filter(folder =>
+        folder.name == workspaceConfig.get<string>("modem")
+    )
+    let modemWorkspace = await workspace.selectFolder(
+        workspace.Type.Git,
+        modemFolders.length > 0 ? modemFolders : null,
+        "Pick modem folder"
+    );
     if (modemWorkspace != null) {
-        let changelist = await workspace.selectChangelist(modemWorkspace);
+        let changelist = await workspace.selectChangelist(
+            modemWorkspace,
+            "Pick changelist for modem"
+        );
         patches.modem = await modemWorkspace.getPatch(changelist);
     } else {
-        vscode.window.showInformationMessage("No git workspace folder selected");
+        vscode.window.showInformationMessage("Modem workspace is absent");
     }
 
-    //---------------------
-    //         ap
-    //---------------------
-    let apWorkspace = await workspace.selectFolder(workspace.Type.Git);
+    // ap
+    let apFolders = folders.filter(folder =>
+        folder.name == workspaceConfig.get<string>("cooper_sdk")
+    )
+    let apWorkspace = await workspace.selectFolder(
+        workspace.Type.Git,
+        apFolders.length > 0 ? apFolders : null,
+        "Pick AP folder"
+    );
     if (apWorkspace != null) {
-        let changelist = await workspace.selectChangelist(apWorkspace);
+        let changelist = await workspace.selectChangelist(
+            apWorkspace,
+            "Pick changelist for AP"
+        );
         patches.ap = await apWorkspace.getPatch(changelist);
     } else {
-        vscode.window.showInformationMessage("No git workspace folder selected");
+        vscode.window.showInformationMessage("AP workspace is absent");
     }
-    console.log(patches);
 
-    let configWorkspace = apWorkspace ? apWorkspace : modemWorkspace; // AP as main
-    if (!configWorkspace)
-        return;
+    console.log(patches);
 
     //---------------------
     //  submit to Jenkins
     //---------------------
-    let config = vscode.workspace.getConfiguration(
-        "commit-test.jenkins",
-        configWorkspace.folder
+    let sanityConfig = vscode.workspace.getConfiguration(
+        "commit-test.sanity",
+        anyFolderInWorkspace
     );
-    let job = config.get<string>("sanity.jobName");
+
+    let job = sanityConfig.get<string>("jenkins.jobName");
     if (!job) {
         vscode.window.showErrorMessage("Invalid jobName");
         return;
     }
-    let mail = config.get<string>("account.mail");
-    config = vscode.workspace.getConfiguration(
-        "commit-test.jenkins.sanity.parameters",
-        configWorkspace.folder
+    let config = vscode.workspace.getConfiguration(
+        "commit-test",
+        anyFolderInWorkspace
     );
+    let mail = config.get<string>("account.mail");
     let parameters: any = {
-        modem_revision: config.get<string>("modem_revision"),
-        modem_config: config.get<string>("modem_config"),
-        modem_cppflags: config.get<string>("modem_cppflags"),
-        ap_revision: config.get<string>("ap_revision"),
-        ap_config: config.get<string>("ap_config"),
-        ap_cppflags: config.get<string>("ap_cppflags"),
-        testcase: config.get<string>("testcase")
+        modem_revision: sanityConfig.get<string>("parameters.modem.revision"),
+        modem_config: sanityConfig.get<string>("parameters.modem.config"),
+        modem_cppflags: sanityConfig.get<string>("parameters.modem.cppflags"),
+        ap_revision: sanityConfig.get<string>("parameters.ap.revision"),
+        ap_config: sanityConfig.get<string>("parameters.ap.config"),
+        ap_cppflags: sanityConfig.get<string>("parameters.ap.cppflags"),
+        testcase: sanityConfig.get<string>("parameters.testcase")
     }
     if (patches.modem)
         parameters.modem_patch = Buffer.from(patches.modem);
@@ -93,7 +122,7 @@ export async function sanityTest() {
     console.log(parameters);
 
     try {
-        let result = await submitBuild(configWorkspace.folder, job, parameters, 'ticket');
+        let result = await submitBuild(anyFolderInWorkspace, job, parameters, 'ticket');
         console.log(result);
         vscode.window.showInformationMessage(result.result);
     } catch (error) {

@@ -60,48 +60,60 @@
 					"default": "http://172.26.6.130:8080",
 					"description": "Jenkins host to submit test to"
 				},
-				"commit-test.jenkins.sanity.jobName": {
+				"commit-test.workspace.modem": {
+					"type": "string",
+					"scope": "resource",
+					"default": "modem",
+					"description": "Folder name of modem in the workspace"
+				},
+				"commit-test.workspace.cooper_sdk": {
+					"type": "string",
+					"scope": "resource",
+					"default": "cooper_sdk",
+					"description": "Folder name of cooper_sdk in the workspace"
+				},
+				"commit-test.sanity.jenkins.jobName": {
 					"type": "string",
 					"scope": "resource",
 					"default": "SDLC/cooper/sanity",
 					"description": "Jenkins job to submit sanity test to"
 				},
-				"commit-test.jenkins.sanity.parameters.modem_revision": {
+				"commit-test.sanity.parameters.modem.revision": {
 					"type": "string",
 					"scope": "resource",
 					"default": "master",
 					"markdownDescription": ""
 				},
-				"commit-test.jenkins.sanity.parameters.modem_config": {
+				"commit-test.sanity.parameters.modem.config": {
 					"type": "string",
 					"scope": "resource",
 					"default": "",
 					"markdownDescription": "Extra variables to use while configuring modem. Do not define `CPPFLAGS` variable here, please use `#commit-test.jenkins.sanity.modem_cppflags#` for macro defining."
 				},
-				"commit-test.jenkins.sanity.parameters.modem_cppflags": {
+				"commit-test.sanity.parameters.modem.cppflags": {
 					"type": "string",
 					"scope": "resource",
 					"default": "",
 					"description": "Extra CPPFLAGS to use while building modem."
 				},
-				"commit-test.jenkins.sanity.parameters.ap_revision": {
+				"commit-test.sanity.parameters.ap.revision": {
 					"type": "string",
 					"scope": "resource",
 					"default": "master",
 					"markdownDescription": ""
 				},
-				"commit-test.jenkins.sanity.parameters.ap_config": {
+				"commit-test.sanity.parameters.ap.config": {
 					"type": "string",
 					"scope": "resource",
 					"markdownDescription": "Extra variables to use while building AP. Do not define `CPPFLAGS` variable here, please use `#commit-test.jenkins.sanity.ap_cppflags#` for macro defining."
 				},
-				"commit-test.jenkins.sanity.parameters.ap_cppflags": {
+				"commit-test.sanity.parameters.ap.cppflags": {
 					"type": "string",
 					"scope": "resource",
 					"default": "",
 					"description": "Extra CPPFLAGS to use while building AP."
 				},
-				"commit-test.jenkins.sanity.parameters.testcase": {
+				"commit-test.sanity.parameters.testcase": {
 					"type": "string",
 					"enum": ["ping", "ping_after_idle", "Eclipse_Leshan", "ping_100_times", "long_idle"],
 					"default": "ping",

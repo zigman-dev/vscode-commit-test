@@ -18,12 +18,15 @@ export { Type } from './scm';
 //  interface
 //------------------------------------------------------------------------------
 export async function selectFolder(
-    scmType: scm.Type | null = null
+    scmType: scm.Type | null = null,
+    folders: vscode.WorkspaceFolder[] | null = null,
+    prompt: string | null = null
 ): Promise<scm.Scm | null> {
 
     // FIXME: Rewrite with filter/map
     let scmWorkspaces: scm.Scm[] = [];
-    for (let folder of vscode.workspace.workspaceFolders || []) {
+
+    for (let folder of (folders ? folders : vscode.workspace.workspaceFolders) || []) {
         let scmWorkspace = await scm.getScmWorkspace(folder);
         if (scmType == null || scmWorkspace.type == scmType)
             scmWorkspaces.push(scmWorkspace);
@@ -41,7 +44,7 @@ export async function selectFolder(
                     scmWorkspace: wc
                 }
             }),
-            { placeHolder: "Pick a folder" }
+            { placeHolder: prompt ? prompt : "Pick a folder" }
         );
         if (!pick)
             return null
@@ -52,13 +55,16 @@ export async function selectFolder(
 }
 
 //------------------------------------------------------------------------------
-export async function selectChangelist(scmWorkspace: scm.Scm): Promise<string | null> {
+export async function selectChangelist(
+    scmWorkspace: scm.Scm,
+    prompt: string | null = null
+): Promise<string | null> {
     let changelists = await scmWorkspace.getChangelists();
     let changelist: string | null = null;
     if (changelists.length > 0) {
         let pick = await vscode.window.showQuickPick(
             changelists,
-            { placeHolder: "Pick a changelist" }
+            { placeHolder: prompt ? prompt : "Pick a changelist" }
         );
         if (pick)
             changelist = pick;
