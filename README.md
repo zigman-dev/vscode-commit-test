@@ -1,36 +1,18 @@
 # commit-test
 
-[cmgk](http://172.26.6.129/scm/cmgk.git) commit-test client for VSCode,
-which submits test to
-[our Jenkins service](http://172.26.6.130:8080/mainline/commit_test),
-is an alternative to the original command-line based client, which submit test
-to the legacy [celeryd service](amqp://cmgk@172.26.6.130).
+VSCode Jenkins client to submit tests for Cooper workspace. Currently the only
+supported test is sanity test, which let users test/debug their change on real
+board.
 
-> The legacy celeryd service will not receive any further improvements in the
-> future. Please switch to the Jenkins service even you are not going to use
-> this extension.
-
-Sanity test for Cooper is also supported (experimentally).
-
-> We plan to add more Jenkins jobs will in the future.
-
-## Features
-
-*   Support `svn` changelist
-    *   Let user select a changelist (or default) to submit test for
-
-    > The operations of changelists, such as creation, moving files, removal or
-    > committing, are still left to the `svn` client you use.
-
-*   Status update
-    *   Live Jenkins logging on a dedicated output window
-    *   Retrieve ticket on completion
-*   Support multi-root VSCode workspace
-    *   Explicitly, by letting user select a folder with valid `svn` workspace
-        among those detected
-    *   Or implicitly, by starting test against the selected changelist
+> [cmgk](http://172.26.6.129/scm/cmgk.git) commit-test functionalities were
+> removed since `0.0.8`, as modem code base was moved from svn to SDLC-Gerrit
+> and the pre-commit verification is integrated with Gerrit code-review
+> workflow.
 
 ## Extension Settings
+
+The settings are expected to be at workspace-level instead of folder-level. That
+is, they should appear in `.code-workspace` file.
 
 ```json
 {
@@ -41,23 +23,35 @@ Sanity test for Cooper is also supported (experimentally).
                 "user": "your.name",
                 // Password for the valid account
                 "password": "password",
-
                 // Mail address to send notification to, optional
                 "mail": "your.mail@realtek.com",
             },
 
             // Jenkins host to submit test to, just use default
             "hostAddress": "http://172.26.6.130:8080",
-
-            "sanity": {
-                // Jenkins job to submit sanity test to, just use default
-                "jobName": "SDLC/cooper/sanity",
-                // Parameters for sanity test. Normally these will be tweaked for individual test.
-                "parameters": {
+        },
+        "workspace": {
+            // Folder name of modem in the multi-root workspace, recommend to follow the default
+            "modem": "modem",
+            // Folder name of AP in the multi-root workspace, recommend to follow the default
+            "ap": "cooper_sdk"
+        },
+        "sanity": {
+            // Jenkins job to submit sanity test to, just use default
+            "jobName": "SDLC/cooper/sanity",
+            // Parameters for sanity test. Normally these will be tweaked for individual test.
+            "parameters": {
+                "modem": {
+                    // Revision to checkout while building modem
+                    "revision": "master"
                     // Extra variables to use while configuring modem. Do not define CPPFLAGS variable here, please use modem_cppflags for macro defining.
                     "modem_config": "",
                     // Extra CPPFLAGS to use while building modem.
                     "modem_cppflags": "",
+                },
+                "ap": {
+                    // Revision to checkout while building AP
+                    "revision": "master"
                     // Extra variables to use while building AP. Do not define CPPFLAGS variable here, please use ap_cppflags for macro defining.
                     "ap_config": "",
                     // Extra CPPFLAGS to use while building AP
@@ -84,39 +78,29 @@ Install it directly with command:
 code --install-extension commit-test-0.0.1.vsix
 ```
 
-## Basic Usage
+## Workspace layout
 
-The easiest way to use the extension is to submit commit-test by clicking the
-`Submit Commit-Test for Changelist` icon of the target changelist:
+As Cooper uses two seperate code bases, one for modem and the other for AP, we
+assume both of them, if used, are within a multi-root workspace (please refer to
+[multi-root workspace](https://code.visualstudio.com/docs/editor/multi-root-workspaces))
 
-![Submit](images/submit-for-cl.png)
+The extension follows the setting `commit-test.workspace` to find modem/AP
+folders. `commit-test.workspace.modem`/`commit-test.workspace.ap` specifies the
+name of modem/AP folders appearing in current workspace respectively.
 
-Wait several seconds for the extension to submit diff/patch of the change list
-to Jenkins. Once successfully submitted, a notification will be popped up to
-inform URL of the Jenkins build, and a output console will update the Jenkins
-console:
+There can be zero, one or more modem folders in the workspace, but only the one
+specified by `commit-test.workspace.modem` is used by the extension. If there's
+no folder with name specified by `commit-test.workspace.modem`, user will not be
+prompted to select one. If none is selected, modem part will be ignored.
 
-![Submitted](images/submitted.png)
+The same applies to AP as well.
 
-On completion, the result will be informed with a notification. In case of
-`SUCCESS`, there are several ways to get the ticket issued:
+> Note that the extension setting is expected to be at workspace-level.
 
-*   The complete notification contains the ticket
-*   Changelists with ticket available are labeled a bookmark icon (corresponding
-    to `Get Ticket for Changelist` command), click it to query the ticket
+## Usage
 
-    > See the [limitations](#Limitations)
-
-*   Ticket can also be found in Jenkins log (either in the output console or
-    Jenkins web)
-*   Mail notification, sent to the mail address in
-
-![ticket](images/success.png)
-
-## Commands
-
-There are also commands (under "Commit-Test" category) which can be launched
-from the command palette
+The commands are under "Commit-Test" category, which can be launched from the
+command palette
 (<kbd>ctrl</kbd>+<kbd>shift</kbd>+<kbd>p</kbd>).
 
 ![Commands](images/commands.png)
@@ -129,71 +113,13 @@ displayed with notification.
 
 ![good-to-go](images/good-to-go.png)
 
-### `Submit Commit-Test`
-
-This is an alternative way to submit commit-test. The difference is in that
-`svn` folder and changelist to submit commit-test for are selected with quick
-pick (if selection is necessary).
-
 ### `Submit Sanity-Test for Cooper`
 
-Not directly related to `cmgk`, but should be handy for people who utilizes
-`SDLC/cooper/sanity` to perform automated test on Cooper board.
+This sanity-test should be handy for people who utilizes `SDLC/cooper/sanity` to
+perform automated test on Cooper board.
 
 Launching test should be straightforward. Remember to specify build
-configurations and test case via settings:
-
-*   `commit-test.jenkins.sanity.parameters`
-*   `commit-test.jenkins.sanity.testcase`
-
-## `svn` changelist support
-
-`svn` supports [changelists](http://svnbook.red-bean.com/en/1.6/svn.advanced.changelists.html)
-to manage multiple changes within a single workspace. Both
-`Submit Commit-Test for Changelist` and `Submit Commit-Test` commands support
-submitting diff/patch of specific changelist (or default) by offering selection
-of changelist (in case at least one changelist exists for `Submit Commit-Test`).
-
-But the operations of changelists, such as creation, moving files, removal or
-committing, are still left to the `svn` client you use. Just remember to commit
-the changelist you submit commit-test for.
-
-## Multi-root workspace support
-
-This extension is aware of
-[multi-root workspace](https://code.visualstudio.com/docs/editor/multi-root-workspaces).
-
-> For `Submit Commit-Test` command, while more than one folders under the
-> multi-root workspace is applicable to the command issued, a prompt will be
-> popped up to ask for the folder to work with.
-
-Selecting folder has two meanings:
-
-*   The settings to use. If your settings are in folder scope, selecting that
-    folder also select the settings to use.
-
-    > The settings can be placed in higher scopes (workspace- or even
-    > user-scope)
-
-*   For commands like `Submit Commit-Test`, it is only meaningful with a folder
-    containing valid `svn` workspace. Selecting a folder (with valid `svn`
-    workspace) not only determines the settings to use, but where to gather
-    diff/patch to submit commit-test for.
-
-## Limitations
-
-*   Ticket availability indicator cannot distinguish different `svn` folders in
-    a multi-root workspace. That is, if we have two changelists in folder `foo`
-    and `bar` both named `my-fance-cl` and the one in folder `foo` got ticket,
-    the `my-fancy-cl` changerlist will also have ticket availability indicated.
-
-    > Default changelists in different `svn` folders, unfortunately, have
-    > identical names.
-
-    But don't worry that the tickets are associated with wrong changelists. The
-    ticket will only be responded for the changelist that really owns one (that
-    is, the one in folder `foo` in the above case), the changelist that does not
-    own a ticket responds "n/a".
+configurations and test case via settings `commit-test.sanity.parameters`
 
 ## Release Notes
 

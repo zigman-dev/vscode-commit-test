@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [0.0.8] - 2021-06-07
+
+### Removed
+
+*   Stop supporting `cmgk` commit-test, which is replaced by Gerrit
+    verify/submit
+
 ## [0.0.7] - 2021-04-15
 
 ### Fixed

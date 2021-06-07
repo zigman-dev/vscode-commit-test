@@ -66,7 +66,7 @@ export async function sanityTest() {
 
     // ap
     let apFolders = folders.filter(folder =>
-        folder.name == workspaceConfig.get<string>("cooper_sdk")
+        folder.name == workspaceConfig.get<string>("ap")
     )
     let apWorkspace = await workspace.selectFolder(
         workspace.Type.Git,

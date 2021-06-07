@@ -2,7 +2,7 @@
 	"name": "commit-test",
 	"displayName": "commit-test",
 	"description": "Jenkins-based commit-test",
-	"version": "0.0.7",
+	"version": "0.0.8",
 	"publisher": "zigman",
 	"homepage": "http://172.26.6.129/jy.hsu/vscode-commit-test/blob/master/README.md",
 	"icon": "images/commit-test.png",
@@ -64,13 +64,13 @@
 					"type": "string",
 					"scope": "resource",
 					"default": "modem",
-					"description": "Folder name of modem in the workspace"
+					"description": "Folder name of modem in the multi-root workspace"
 				},
-				"commit-test.workspace.cooper_sdk": {
+				"commit-test.workspace.ap": {
 					"type": "string",
 					"scope": "resource",
 					"default": "cooper_sdk",
-					"description": "Folder name of cooper_sdk in the workspace"
+					"description": "Folder name of AP in the multi-root workspace"
 				},
 				"commit-test.sanity.jenkins.jobName": {
 					"type": "string",
@@ -82,7 +82,7 @@
 					"type": "string",
 					"scope": "resource",
 					"default": "master",
-					"markdownDescription": ""
+					"description": "Revision to checkout while building modem"
 				},
 				"commit-test.sanity.parameters.modem.config": {
 					"type": "string",
@@ -100,7 +100,7 @@
 					"type": "string",
 					"scope": "resource",
 					"default": "master",
-					"markdownDescription": ""
+					"description": "Revision to checkout while building AP"
 				},
 				"commit-test.sanity.parameters.ap.config": {
 					"type": "string",
