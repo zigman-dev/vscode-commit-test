@@ -10,7 +10,7 @@ to the legacy [celeryd service](amqp://cmgk@172.26.6.130).
 > future. Please switch to the Jenkins service even you are not going to use
 > this extension.
 
-Pre-commit test for Cooper is also supported (experimentally).
+Sanity test for Cooper is also supported (experimentally).
 
 > We plan to add more Jenkins jobs will in the future.
 
@@ -49,14 +49,10 @@ Pre-commit test for Cooper is also supported (experimentally).
             // Jenkins host to submit test to, just use default
             "hostAddress": "http://172.26.6.130:8080",
 
-            "commit-test": {
-                // Jenkins job to submit commit-test to, just use default
-                "jobName": "mainline/commit-test"
-            },
-            "pre-commit": {
-                // Jenkins job to submit pre-commit to, just use default
-                "jobName": "cooper/pre-commit",
-                // Parameters for pre-commit. Normally these will be tweaked for individual test.
+            "sanity": {
+                // Jenkins job to submit sanity test to, just use default
+                "jobName": "SDLC/cooper/sanity",
+                // Parameters for sanity test. Normally these will be tweaked for individual test.
                 "parameters": {
                     // Extra variables to use while configuring modem. Do not define CPPFLAGS variable here, please use modem_cppflags for macro defining.
                     "modem_config": "",
@@ -139,16 +135,16 @@ This is an alternative way to submit commit-test. The difference is in that
 `svn` folder and changelist to submit commit-test for are selected with quick
 pick (if selection is necessary).
 
-### `Submit Pre-Commit-Test for Cooper`
+### `Submit Sanity-Test for Cooper`
 
 Not directly related to `cmgk`, but should be handy for people who utilizes
-`cooper/pre-commit` to perform automated test on Cooper board.
+`SDLC/cooper/sanity` to perform automated test on Cooper board.
 
 Launching test should be straightforward. Remember to specify build
 configurations and test case via settings:
 
-*   `commit-test.jenkins.pre-commit.parameters`
-*   `commit-test.jenkins.pre-commit.testcase`
+*   `commit-test.jenkins.sanity.parameters`
+*   `commit-test.jenkins.sanity.testcase`
 
 ## `svn` changelist support
 

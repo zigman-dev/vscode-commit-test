@@ -20,10 +20,10 @@ import { Scm } from './scm';
 //------------------------------------------------------------------------------
 //  interface
 //------------------------------------------------------------------------------
-export default { preCommitTest };
+export default { sanityTest };
 
 //------------------------------------------------------------------------------
-export async function preCommitTest() {
+export async function sanityTest() {
 
     let patches: {
         modem: string | null,
@@ -33,12 +33,12 @@ export async function preCommitTest() {
     //---------------------
     //       modem
     //---------------------
-    let modemWorkspace = await workspace.selectFolder(workspace.Type.Svn);
+    let modemWorkspace = await workspace.selectFolder(workspace.Type.Git);
     if (modemWorkspace != null) {
         let changelist = await workspace.selectChangelist(modemWorkspace);
         patches.modem = await modemWorkspace.getPatch(changelist);
     } else {
-        vscode.window.showInformationMessage("No svn workspace folder selected");
+        vscode.window.showInformationMessage("No git workspace folder selected");
     }
 
     //---------------------
@@ -64,14 +64,14 @@ export async function preCommitTest() {
         "commit-test.jenkins",
         configWorkspace.folder
     );
-    let job = config.get<string>("pre-commit.jobName");
+    let job = config.get<string>("sanity.jobName");
     if (!job) {
         vscode.window.showErrorMessage("Invalid jobName");
         return;
     }
     let mail = config.get<string>("account.mail");
     config = vscode.workspace.getConfiguration(
-        "commit-test.jenkins.pre-commit.parameters",
+        "commit-test.jenkins.sanity.parameters",
         configWorkspace.folder
     );
     let parameters: any = {

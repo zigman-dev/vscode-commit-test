@@ -1,13 +1,13 @@
 import * as vscode from 'vscode';
 
 import verifyEnvironment from "./verify";
-import { preCommitTest } from "./cooper"
+import { sanityTest } from "./cooper"
 
 export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand(
         'commit-test.verifyEnvironment', verifyEnvironment));
     context.subscriptions.push(vscode.commands.registerCommand(
-        'commit-test.preCommitTest', preCommitTest));
+        'commit-test.sanityTest', sanityTest));
 }
 
 // this method is called when your extension is deactivated
