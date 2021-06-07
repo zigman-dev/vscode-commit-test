@@ -15,25 +15,25 @@ export default async function verifyEnvironment() {
     console.log("verifyEnvironment()");
 
     // Get user acount if supplied
-    // FIXME: Handle multi-folder workspace
-    let folder = await workspace.selectFolder();
-    if (folder == null) {
-        vscode.window.showWarningMessage("No workspace folder selected");
+    let folders = vscode.workspace.workspaceFolders;
+    if (!folders || folders.length == 0) {
+        vscode.window.showWarningMessage("Empty workspace");
         return;
     }
+    let anyFolderInWorkspace = folders[0];
 
     let config = vscode.workspace.getConfiguration(
-        "commit-test.jenkins",
-        folder.folder
+        "commit-test",
+        anyFolderInWorkspace
     );
-    let job = config.get<string>("commit-test.jobName");
+    let job = config.get<string>("sanity.jenkins.jobName");
     if (!job) {
         vscode.window.showErrorMessage("Invalid jobName");
         return;
     }
 
     try {
-        let result = await getJob(folder.folder, job);
+        let result = await getJob(anyFolderInWorkspace, job);
         console.log(result)
         vscode.window.showInformationMessage('OK, we are good to go');
     } catch (error) {
