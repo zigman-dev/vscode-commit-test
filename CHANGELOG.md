@@ -9,6 +9,10 @@
 *   Stop supporting `cmgk` commit-test, which is replaced by Gerrit
     verify/submit
 
+### Fixed
+
+*   Migrate pre-commit test to sanity test for both modem and AP on SDLC Gerrit
+
 ## [0.0.7] - 2021-04-15
 
 ### Fixed
