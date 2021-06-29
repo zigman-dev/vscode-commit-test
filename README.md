@@ -4,7 +4,7 @@ VSCode Jenkins client to submit tests for Cooper workspace. Currently the only
 supported test is sanity test, which let users test/debug their change on real
 board.
 
-> [cmgk](http://172.26.6.129/scm/cmgk.git) commit-test functionalities were
+> [cmgk](http://172.26.5.129/scm/cmgk.git) commit-test functionalities were
 > removed since `0.0.8`, as modem code base was moved from svn to SDLC-Gerrit
 > and the pre-commit verification is integrated with Gerrit code-review
 > workflow.
@@ -28,7 +28,7 @@ is, they should appear in `.code-workspace` file.
             },
 
             // Jenkins host to submit test to, just use default
-            "hostAddress": "http://172.26.6.130:8080",
+            "hostAddress": "http://172.26.5.130:8080",
         },
         "workspace": {
             // Folder name of modem in the multi-root workspace, recommend to follow the default
@@ -71,7 +71,7 @@ This extension is not pulished to official VSCode repository. Before it is made
 availabe via any repository, public or private, please install it offline.
 
 Please downalod the latest release (in `.vsix`) from the
-[release page](http://172.26.6.129/jy.hsu/vscode-commit-test/-/releases).
+[release page](http://172.26.5.129/jy.hsu/vscode-commit-test/-/releases).
 Install it directly with command:
 
 ```sh

@@ -4,7 +4,7 @@
 	"description": "Jenkins-based commit-test",
 	"version": "0.0.8",
 	"publisher": "zigman",
-	"homepage": "http://172.26.6.129/jy.hsu/vscode-commit-test/blob/master/README.md",
+	"homepage": "http://172.26.5.129/jy.hsu/vscode-commit-test/blob/master/README.md",
 	"icon": "images/commit-test.png",
 	"repository": {
 		"type": "git",
@@ -57,7 +57,7 @@
 					"type": "string",
 					"format": "uri",
 					"scope": "resource",
-					"default": "http://172.26.6.130:8080",
+					"default": "http://172.26.5.130:8080",
 					"description": "Jenkins host to submit test to"
 				},
 				"commit-test.workspace.modem": {
